@@ -61,7 +61,7 @@ public class Robot extends TimedRobot {
  
 
  public Robot(){
-
+ PortForwarder.add(5800, "photonvision.local", 5800);
 
  // Logger.recordMetadata("ProjectName", "MyProject"); // Set a metadata value
  //if (isReal()) {

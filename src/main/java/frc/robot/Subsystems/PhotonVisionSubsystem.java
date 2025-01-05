@@ -11,13 +11,11 @@ public class PhotonVisionSubsystem extends SubsystemBase {
         camera = new PhotonCamera(cameraName); 
     }
 
-    @SuppressWarnings("removal")
     public boolean hasTarget() {
         return camera.getLatestResult().hasTargets();
     }
 
     public double getYaw() {
-        @SuppressWarnings("removal")
         PhotonPipelineResult result = camera.getLatestResult();
         return result.hasTargets() ? result.getBestTarget().getYaw() : 0.0;
     }
@@ -26,8 +24,7 @@ public class PhotonVisionSubsystem extends SubsystemBase {
         camera.setPipelineIndex(pipelineIndex); // Switch pipelines dynamically
         camera.setDriverMode(true);
     }
- @SuppressWarnings("removal")
-@Override
+ @Override
     public void periodic() {
         // Update whether a target is visible on the SmartDashboard
         SmartDashboard.putNumber("PhotonVision/Target Yaw", getYaw());
