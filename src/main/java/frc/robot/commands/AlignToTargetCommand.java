@@ -1,11 +1,13 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
+import org.photonvision.targeting.PhotonTrackedTarget;
+
+import java.util.List;
 
 public class AlignToTargetCommand extends Command {
     private final DriveTrainSubsystem driveTrain;
@@ -28,12 +30,24 @@ public class AlignToTargetCommand extends Command {
     @Override
     public void execute() {
         if (vision.hasTarget()) {
-            double yawError = vision.getYaw(); // Get target yaw error
-            double turnSpeed = pidController.calculate(yawError, 0); // Align to 0 yaw error
-           
+            // Retrieve the best target
+            PhotonTrackedTarget bestTarget = vision.getBestTarget();
+            double yawError;
 
+            if (bestTarget != null) {
+                yawError = bestTarget.getYaw(); // Align to the best target
+            } else {
+                // Optional: Align to the average yaw of all targets
+                List<PhotonTrackedTarget> targets = vision.getAllTargets();
+                yawError = targets.stream()
+                                  .mapToDouble(PhotonTrackedTarget::getYaw)
+                                  .average()
+                                  .orElse(0.0); // Default to 0.0 if no targets
+            }
 
-            // Use drive() with a stationary Translation2d (no X/Y movement)
+            double turnSpeed = pidController.calculate(yawError, 0.0); // Align to 0 yaw error
+
+            // Drive the robot with calculated turning speed
             driveTrain.drive(new Translation2d(0.0, 0.0), turnSpeed);
         } else {
             // Stop if no target is detected
@@ -44,7 +58,8 @@ public class AlignToTargetCommand extends Command {
     @Override
     public boolean isFinished() {
         // Finish when aligned within 1 degree
-        return vision.hasTarget() && Math.abs(vision.getYaw()) < 1.0;
+        PhotonTrackedTarget bestTarget = vision.getBestTarget();
+        return bestTarget != null && Math.abs(bestTarget.getYaw()) < 1.0;
     }
 
     @Override
