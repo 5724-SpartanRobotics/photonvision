@@ -21,7 +21,7 @@ import frc.robot.Util.Conversions;
 
 public class SwerveModule {
 
-    private double offset;
+    private final double offset;
     private final TalonFX turnMotor;
     private final TalonFX driveMotor;
     private final CANcoder canCoder;
@@ -37,11 +37,13 @@ public class SwerveModule {
         this.offset = offset;
         this.moduleName = name;
 
+        // Initialize motors and encoder
         turnMotor = new TalonFX(turnMotorID);
         driveMotor = new TalonFX(driveMotorID);
         canCoder = new CANcoder(canCoderID);
         canCoderName = name + canCoderID;
 
+        // Initialize control and configuration objects
         turnVoltageControl = new PositionVoltage(0);
         turnConfiguration = new TalonFXConfiguration();
 
@@ -51,15 +53,18 @@ public class SwerveModule {
     }
 
     private void initializeMotors() {
-        driveMotor.getConfigurator().apply(new TalonFXConfiguration());
+        // Configure the drive motor
+        TalonFXConfiguration driveConfig = new TalonFXConfiguration();
+        driveMotor.getConfigurator().apply(driveConfig);
         driveMotor.setNeutralMode(NeutralModeValue.Brake);
 
+        // Configure the turn motor
         turnConfiguration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
         turnConfiguration.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
         turnConfiguration.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
         turnConfiguration.HardwareLimitSwitch.ForwardLimitEnable = false;
         turnConfiguration.HardwareLimitSwitch.ReverseLimitEnable = false;
-        turnConfiguration.Slot0.kP = 0.9;
+        turnConfiguration.Slot0.kP = 0.9; // Ensure this value is tuned for your setup
         turnConfiguration.Voltage.PeakForwardVoltage = 10.0;
         turnConfiguration.Voltage.PeakReverseVoltage = -10.0;
 
@@ -68,33 +73,40 @@ public class SwerveModule {
 
     private void resetTurnToAbsolute() {
         double absolutePosition = Conversions.radiansToFalcon(
-            (canCoder.getAbsolutePosition().getValueAsDouble() * Conversions.twoPi) - offset
+            (Units.degreesToRadians(canCoder.getAbsolutePosition().getValueAsDouble())) - offset
         );
 
         if (DebugSetting.TraceLevel == DebugLevel.Swerve || DebugSetting.TraceLevel == DebugLevel.All) {
-            SmartDashboard.putNumber(moduleName + "Posn abs", absolutePosition);
+            SmartDashboard.putNumber(moduleName + " Posn abs", absolutePosition);
         }
 
-        turnMotor.setPosition(-absolutePosition);
+        // Ensure the turn motor position is set correctly
+        turnMotor.getConfigurator().setPosition(-absolutePosition);
+
     }
 
     private void applyTurnConfiguration() {
         StatusCode status;
         for (int i = 0; i < 5; i++) {
             status = turnMotor.getConfigurator().apply(turnConfiguration);
-            if (status.isOK()) break;
+            if (status.isOK()) {
+                break;
+            } else if (i == 4) {
+                // Log error if configuration consistently fails
+                SmartDashboard.putString(moduleName + " Config Error", status.getDescription());
+            }
         }
     }
 
     public SwerveModuleState getState() {
         double velocity = Conversions.falconToMPS(driveMotor.getVelocity().getValueAsDouble());
-        Rotation2d angle = Rotation2d.fromDegrees(Conversions.falconToDegrees(-turnMotor.getPosition().getValueAsDouble()));
+        Rotation2d angle = Rotation2d.fromRadians(Conversions.falconToRadians(-turnMotor.getPosition().getValueAsDouble()));
         return new SwerveModuleState(velocity, angle);
     }
 
     public SwerveModulePosition getPosition() {
         double position = Conversions.falconToMeters(driveMotor.getPosition().getValueAsDouble());
-        Rotation2d angle = Rotation2d.fromDegrees(Conversions.falconToDegrees(-turnMotor.getPosition().getValueAsDouble()));
+        Rotation2d angle = Rotation2d.fromRadians(Conversions.falconToRadians(-turnMotor.getPosition().getValueAsDouble()));
         return new SwerveModulePosition(position, angle);
     }
 
@@ -106,7 +118,7 @@ public class SwerveModule {
             SmartDashboard.putNumber(moduleName + " DriveRef", driveSpeed);
         }
 
-        driveMotor.set(driveSpeed);
+        driveMotor.set(driveSpeed); // Ensure the motor control mode is set appropriately
 
         double angle = Math.abs(desiredState.speedMetersPerSecond) <= (DriveConstants.maxRobotSpeedmps * 0.01)
             ? driveAngle
@@ -126,11 +138,10 @@ public class SwerveModule {
                 Conversions.falconToRadians(turnMotor.getPosition().getValueAsDouble())
             ));
             SmartDashboard.putNumber(canCoderName, Units.radiansToDegrees(
-                (canCoder.getAbsolutePosition().getValueAsDouble() * Conversions.twoPi) - offset
+                (Units.degreesToRadians(canCoder.getAbsolutePosition().getValueAsDouble())) - offset
             ));
             SmartDashboard.putNumber("Drive FB " + moduleName, driveMotor.getPosition().getValueAsDouble());
-            SmartDashboard.putNumber("DriveAngle " + moduleName, driveAngle);
+            SmartDashboard.putNumber("DriveAngle " + moduleName, Units.radiansToDegrees(driveAngle));
         }
     }
-    
 }

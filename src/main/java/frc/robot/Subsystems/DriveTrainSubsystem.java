@@ -127,7 +127,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
     {
 //            gyroSim = new ADIS16448_IMUSim(gyro);
 //            gyroSim = new ADXRS450_GyroSim(gyroFake);
-     //   LF.simulateInit();
+    //   LF.simulateInit();
      //   RF.simulateInit();
      //   LB.simulateInit();
      //   RB.simulateInit();
@@ -142,7 +142,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
 //            gyroSim.setAngle(0.0);
        LF.periodic();
        RF.periodic();
-     LB.periodic();
+       LB.periodic();
        RB.periodic();
         }
 
