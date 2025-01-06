@@ -64,7 +64,7 @@ public class TeleopSwerve extends Command {
             xAxis = (Math.abs(xAxis) < ControllerConstants.joystickDeadband) ? 0 : xAxis * speedMod;
             zAxis = (Math.abs(zAxis) < ControllerConstants.joystickDeadband) ? 0 : zAxis * speedMod;
 
-            double rotation = zAxis * DriveConstants.maxAngularVelocityRps;
+            double rotation = zAxis * DriveConstants.maxAngularVelocityRadps;
             if (DebugSetting.TraceLevel == DebugLevel.Swerve) {
                 SmartDashboard.putNumber("ControllerRotation", rotation);
                 SmartDashboard.putNumber("ControllerX", xAxis);

@@ -20,17 +20,14 @@ import frc.robot.Subsystems.Constant.DebugLevel;
 import frc.robot.Subsystems.Constant.DebugSetting;
 import frc.robot.Subsystems.Constant.DriveConstants;
 
-
-
 public class DriveTrainSubsystem extends SubsystemBase {
     private final Field2d m_field = new Field2d();
-
+    private final SwerveDriveOdometry swerveDriveOdometry;
     private final SwerveModule LF;
     private final SwerveModule RF;
     private final SwerveModule LB;
     private final SwerveModule RB;
     private final SwerveDriveKinematics swerveDriveKinematics;
-    private final SwerveDriveOdometry swerveDriveOdometry;
     private Pose2d robotPose;
     private final SwerveModule[] modules;
     private Rotation2d lastUpdatedGyroHeading;
@@ -43,6 +40,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
         gyro = new Pigeon2(CanIdConstants.PigeonID);
         UpdateGyro();
         headingController.enableContinuousInput(-Math.PI, Math.PI);
+
         LF = new SwerveModule(CanIdConstants.LFTurnMotor, CanIdConstants.LFDriveMotor, CanIdConstants.LFCanID, DriveConstants.LFOff, "LF");
         RF = new SwerveModule(CanIdConstants.RFTurnMotor, CanIdConstants.RFDriveMotor, CanIdConstants.RFCanID, DriveConstants.RFOff, "RF");
         LB = new SwerveModule(CanIdConstants.LBTurnMotor, CanIdConstants.LBDriveMotor, CanIdConstants.LBCanID, DriveConstants.LBOff, "LB");
@@ -54,12 +52,12 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
         robotPose = new Pose2d(new Translation2d(4.0, 5.0), new Rotation2d());
 
-        SwerveModulePosition[] swerveInititialPositions = {
+        SwerveModulePosition[] swerveInitialPositions = {
             LF.getPosition(), RF.getPosition(), LB.getPosition(), RB.getPosition()
         };
 
         swerveDriveOdometry = new SwerveDriveOdometry(
-            swerveDriveKinematics, getGyroHeading(), swerveInititialPositions, robotPose
+            swerveDriveKinematics, getGyroHeading(), swerveInitialPositions, robotPose
         );
 
         modules = new SwerveModule[]{LF, RF, LB, RB};
@@ -73,6 +71,16 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
     public void setGyroZero() {
         gyro.setYaw(0);
+    }
+
+    public void resetOdometry(Pose2d pose) {
+        swerveDriveOdometry.resetPosition(
+            lastUpdatedGyroHeading,
+            new SwerveModulePosition[]{
+                LF.getPosition(), RF.getPosition(), LB.getPosition(), RB.getPosition()
+            },
+            pose
+        );
     }
 
     public void ZeroDriveSensors(Pose2d xy) {
@@ -104,7 +112,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
         }
     }
 
-
+    @SuppressWarnings("removal")
     private void UpdateGyro() {
         lastUpdatedGyroHeading = Rotation2d.fromDegrees(-gyro.getAngle());
     }
@@ -123,43 +131,39 @@ public class DriveTrainSubsystem extends SubsystemBase {
         LB.setDesiredState(swerveModStates[2]);
         RB.setDesiredState(swerveModStates[3]);
     }
-    public void simulationInit()
-    {
-//            gyroSim = new ADIS16448_IMUSim(gyro);
-//            gyroSim = new ADXRS450_GyroSim(gyroFake);
-    //   LF.simulateInit();
-     //   RF.simulateInit();
-     //   LB.simulateInit();
-     //   RB.simulateInit();
-//          gyroSim.setGyroAngleY(0);
-//            gyroSim.setAngle(0);
+
+    public void simulationInit() {
+        // Simulation initialization logic can go here
     }
+
     @Override
-    public void simulationPeriodic(){
-       // if (gyroSim == null)
-            simulationInit();
-//            gyroSim.setGyroAngleY(Units.radiansToDegrees(0.0));
-//            gyroSim.setAngle(0.0);
-       LF.periodic();
-       RF.periodic();
-       LB.periodic();
-       RB.periodic();
-        }
+    public void simulationPeriodic() {
+        LF.periodic();
+        RF.periodic();
+        LB.periodic();
+        RB.periodic();
+    }
 
     public Pose2d getPose() {
         return robotPose;
     }
+
     public void followTrajectory(SwerveSample sample) {
-        // Get the current pose of the robot
         Pose2d pose = getPose();
 
-        // Generate the next speeds for the robot
         ChassisSpeeds speeds = new ChassisSpeeds(
             sample.vx + xController.calculate(pose.getX(), sample.x),
-            sample.vy + xController.calculate(pose.getX(), sample.y),
-            sample.omega + xController.calculate(pose.getRotation().getRadians(), sample.heading)
+            sample.vy + yController.calculate(pose.getY(), sample.y),
+            sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
         );
 
+        SwerveModuleState[] swerveModStates = swerveDriveKinematics.toSwerveModuleStates(speeds);
+
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModStates, DriveConstants.maxRobotSpeedmps);
+
+        LF.setDesiredState(swerveModStates[0]);
+        RF.setDesiredState(swerveModStates[1]);
+        LB.setDesiredState(swerveModStates[2]);
+        RB.setDesiredState(swerveModStates[3]);
     }
-        
 }
