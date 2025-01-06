@@ -40,14 +40,17 @@ public class PhotonVisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Get the latest result from the camera
+        PhotonPipelineResult result = camera.getLatestResult();
+    
         // Get all detected targets
-        List<PhotonTrackedTarget> targets = getAllTargets();
-
+        List<PhotonTrackedTarget> targets = result.hasTargets() ? result.getTargets() : List.of();
+    
         // Log the number of detected targets to SmartDashboard
         SmartDashboard.putNumber("PhotonVision/Number of Targets", targets.size());
-
+    
         // Update best target details
-        PhotonTrackedTarget bestTarget = getBestTarget();
+        PhotonTrackedTarget bestTarget = result.hasTargets() ? result.getBestTarget() : null;
         if (bestTarget != null) {
             SmartDashboard.putNumber("PhotonVision/Best Target Yaw", bestTarget.getYaw());
             SmartDashboard.putNumber("PhotonVision/Best Target Pitch", bestTarget.getPitch());
@@ -55,8 +58,15 @@ public class PhotonVisionSubsystem extends SubsystemBase {
         } else {
             SmartDashboard.putString("PhotonVision/Best Target", "No targets");
         }
-
+    
         // Log whether any targets are visible
-        SmartDashboard.putBoolean("PhotonVision/Has Target", hasTarget());
+        SmartDashboard.putBoolean("PhotonVision/Has Target", result.hasTargets());
+    
+        // Calculate and log latency
+       // double latencyMillis = result.getLatencyMillis();  // Get latency in milliseconds
+        //double latencySeconds = latencyMillis / 1000.0;  // Convert to seconds
+        //SmartDashboard.putNumber("PhotonVision/Latency (s)", latencySeconds);
     }
+    
+    
 }
