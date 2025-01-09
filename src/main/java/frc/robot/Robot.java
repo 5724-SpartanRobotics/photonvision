@@ -32,8 +32,11 @@ import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.TeleopSwerve;
+public class Robot extends LoggedRobot {
 
-public class Robot extends TimedRobot {
+    
+
+public class robot extends TimedRobot {
     private DriveTrainSubsystem drive;
     private PhotonVisionSubsystem vision;
     private XboxController drivestick = new XboxController(0);
@@ -154,4 +157,5 @@ public void autonomousInit() {
     private boolean isRedAlliance() {
       return DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red;
   }  
+}
 }
