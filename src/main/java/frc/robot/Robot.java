@@ -12,13 +12,11 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import choreo.Choreo;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
-import choreo.auto.AutoFactory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -32,11 +30,9 @@ import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.TeleopSwerve;
+
 public class Robot extends LoggedRobot {
 
-    
-
-public class robot extends TimedRobot {
     private DriveTrainSubsystem drive;
     private PhotonVisionSubsystem vision;
     private XboxController drivestick = new XboxController(0);
@@ -52,20 +48,20 @@ public class robot extends TimedRobot {
         // Initialize subsystems
         drive = new DriveTrainSubsystem();
         vision = new PhotonVisionSubsystem("limelight");
-        
+
         // Set default teleop command
         drive.setDefaultCommand(new TeleopSwerve(drive, drivestick));
-    
+
         // Initialize power distribution
         powerDistribution = new PowerDistribution(0, ModuleType.kCTRE);
-    
+
         // Add Field2d to SmartDashboard
         SmartDashboard.putData("Field", field);
-    
+
         // Logger setup for AdvantageScope
         Logger.recordMetadata("ProjectName", "MyRobotProject");
         Logger.recordMetadata("RobotName", "MyRobot");
-    
+
         // Add log data receivers
         if (isReal()) {
             Logger.addDataReceiver(new WPILOGWriter("/media/sda1/")); // USB logging
@@ -75,76 +71,73 @@ public class robot extends TimedRobot {
             Logger.setReplaySource(new WPILOGReader(logPath)); // Replay from log
             Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save new log
         }
-    
+
         // Log Choreo trajectory
         trajectory.ifPresent(t -> {
             // Convert the trajectory to a supported format and log it
             SwerveSample[] samples = t.samples().toArray(new SwerveSample[0]);
             Logger.recordOutput("Choreo/Trajectory", samples);
         });
-    
+
         // Start the logger
         Logger.start();
     }
-    
-    
 
-@Override
-public void robotPeriodic() {
-    // Run the CommandScheduler to execute scheduled commands
-    CommandScheduler.getInstance().run();
+    @Override
+    public void robotPeriodic() {
+        // Run the CommandScheduler to execute scheduled commands
+        CommandScheduler.getInstance().run();
 
-    // Log data for the power distribution panel
-    if (powerDistribution != null) {
-        SmartDashboard.putNumber("PDP Voltage", powerDistribution.getVoltage());
-        SmartDashboard.putNumber("PDP Total Current", powerDistribution.getTotalCurrent());
-        SmartDashboard.putNumber("PDP Total Power", powerDistribution.getTotalPower());
-        SmartDashboard.putNumber("PDP Temperature", powerDistribution.getTemperature());
-    }
-
-    // Log errors or warnings using QFRCLib
-    QFRCLib.reportError(ErrorLevel.Critical, "Browned out!");
-    QFRCLib.reportError(ErrorLevel.Warning, "Battery Voltage is low");
-    QFRCLib.reportError(ErrorLevel.Information, "Robot is ready.");
-
-    // Log swerve module states
-    SwerveModuleState[] states = new SwerveModuleState[]{
-        new SwerveModuleState(), // Replace with actual states
-        new SwerveModuleState(),
-        new SwerveModuleState(),
-        new SwerveModuleState()
-    };
-    Logger.recordOutput("SwerveModuleStates", states);
-
-    // Log pose information
-    Pose3d poseA = new Pose3d(); // Replace with actual pose
-    Pose3d poseB = new Pose3d(); // Replace with actual pose
-    Logger.recordOutput("PoseA", poseA);
-    Logger.recordOutput("PoseArray", new Pose3d[]{poseA, poseB});
-}
-
-
-@Override
-public void autonomousInit() {
-    QFRCLib.setTab("Autonomous");
-
-    // If a trajectory is loaded, get its initial pose
-    if (trajectory.isPresent()) {
-        Optional<Pose2d> initialPose = trajectory.get().getInitialPose(isRedAlliance());
-        if (initialPose.isPresent()) {
-            drive.resetOdometry(initialPose.get()); // Reset odometry to the start of the trajectory
+        // Log data for the power distribution panel
+        if (powerDistribution != null) {
+            SmartDashboard.putNumber("PDP Voltage", powerDistribution.getVoltage());
+            SmartDashboard.putNumber("PDP Total Current", powerDistribution.getTotalCurrent());
+            SmartDashboard.putNumber("PDP Total Power", powerDistribution.getTotalPower());
+            SmartDashboard.putNumber("PDP Temperature", powerDistribution.getTemperature());
         }
+
+        // Log errors or warnings using QFRCLib
+        QFRCLib.reportError(ErrorLevel.Critical, "Browned out!");
+        QFRCLib.reportError(ErrorLevel.Warning, "Battery Voltage is low");
+        QFRCLib.reportError(ErrorLevel.Information, "Robot is ready.");
+
+        // Log swerve module states
+        SwerveModuleState[] states = new SwerveModuleState[]{
+                new SwerveModuleState(), // Replace with actual states
+                new SwerveModuleState(),
+                new SwerveModuleState(),
+                new SwerveModuleState()
+        };
+        Logger.recordOutput("SwerveModuleStates", states);
+
+        // Log pose information
+        Pose3d poseA = new Pose3d(); // Replace with actual pose
+        Pose3d poseB = new Pose3d(); // Replace with actual pose
+        Logger.recordOutput("PoseA", poseA);
+        Logger.recordOutput("PoseArray", new Pose3d[]{poseA, poseB});
     }
 
-    // Reset and start the timer
-    timer.restart();
-}
+    @Override
+    public void autonomousInit() {
+        QFRCLib.setTab("Autonomous");
+
+        // If a trajectory is loaded, get its initial pose
+        if (trajectory.isPresent()) {
+            Optional<Pose2d> initialPose = trajectory.get().getInitialPose(isRedAlliance());
+            if (initialPose.isPresent()) {
+                drive.resetOdometry(initialPose.get()); // Reset odometry to the start of the trajectory
+            }
+        }
+
+        // Reset and start the timer
+        timer.restart();
+    }
 
     @Override
     public void teleopPeriodic() {
         // Trigger alignment to target
         if (drivestick.getAButtonPressed()) {
-            new AlignToTargetCommand(drive, vision).schedule();
+            new AlignToTargetCommand(drive, vision, drivestick).schedule();
         }
 
         // Toggle vision camera driver mode
@@ -154,8 +147,8 @@ public void autonomousInit() {
             vision.setPipeline(1); // Switch back to target pipeline
         }
     }
+
     private boolean isRedAlliance() {
-      return DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red;
-  }  
-}
+        return DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red;
+    }  
 }

@@ -31,6 +31,7 @@ public class Constant {
     
         // Maximum angular velocity (in radians per second)
         public static final double maxAngularVelocityRadps = Math.PI * 2;
+        public static final double maxLinearSpeed = 15.5F / 3.281F;
     
         // Wheelbase and track width (in meters)
         public static final double wheelBase = 0.6; // Distance between front and back wheels
