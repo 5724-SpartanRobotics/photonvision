@@ -38,10 +38,10 @@ public class Constant {
         public static final double trackWidth = 0.6; // Distance between left and right wheels
     
         // Swerve module offsets (in radians) - adjust these based on calibration
-        public static final double LFOff = 0.0;
-        public static final double RFOff = 0.0;
-        public static final double LBOff = 0.0;
-        public static final double RBOff = 0.0;
+        public static final double LFOff = 2.36;
+        public static final double RFOff = 2.33;
+        public static final double LBOff = 4.499;
+        public static final double RBOff = 0.182;
     
         // Module positions relative to the robot center (in meters)
         public static final Translation2d LFLocation = new Translation2d(wheelBase / 2.0, trackWidth / 2.0); // Front left
