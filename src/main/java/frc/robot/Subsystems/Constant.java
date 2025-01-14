@@ -4,6 +4,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
 public class Constant {
+    public static final double TwoPI = Math.PI * 2;
+
     public static final class CanIdConstants{
         public static final int LFTurnMotor = 2;//falcon500
         public static final int LFDriveMotor = 3;//falcon500
@@ -38,10 +40,10 @@ public class Constant {
         public static final double trackWidth = 0.6; // Distance between left and right wheels
     
         // Swerve module offsets (in radians) - adjust these based on calibration
-        public static final double LFOff = 2.36;
-        public static final double RFOff = 2.33;
-        public static final double LBOff = 4.499;
-        public static final double RBOff = 0.182;
+        public static final double LFOff = 0.0;
+        public static final double RFOff = 0.0;
+        public static final double LBOff = 0.0;
+        public static final double RBOff = 0.0; 
     
         // Module positions relative to the robot center (in meters)
         public static final Translation2d LFLocation = new Translation2d(wheelBase / 2.0, trackWidth / 2.0); // Front left

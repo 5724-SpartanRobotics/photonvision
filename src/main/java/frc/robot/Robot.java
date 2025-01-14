@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -35,7 +35,7 @@ public class Robot extends LoggedRobot {
 
     private DriveTrainSubsystem drive;
     private PhotonVisionSubsystem vision;
-    private XboxController drivestick = new XboxController(0);
+    private Joystick drivestick = new Joystick(0); // Replaced XboxController with Joystick
     private PowerDistribution powerDistribution;
     private Field2d field = new Field2d();
     private Timer timer = new Timer();
@@ -44,51 +44,39 @@ public class Robot extends LoggedRobot {
     private final Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("myTrajectory");
 
     @Override
-    public void robotInit() {
-        // Initialize subsystems
-        drive = new DriveTrainSubsystem();
-        vision = new PhotonVisionSubsystem("limelight");
+public void robotInit() {
+    drive = new DriveTrainSubsystem();
+    vision = new PhotonVisionSubsystem("limelight");
 
-        // Set default teleop command
-        drive.setDefaultCommand(new TeleopSwerve(drive, drivestick));
+    // Pass DriveTrainSubsystem and Joystick to TeleopSwerve
+    drive.setDefaultCommand(new TeleopSwerve(drive, drivestick));
 
-        // Initialize power distribution
-        powerDistribution = new PowerDistribution(0, ModuleType.kCTRE);
+    // Initialize power distribution
+    powerDistribution = new PowerDistribution(0, ModuleType.kCTRE);
 
-        // Add Field2d to SmartDashboard
-        SmartDashboard.putData("Field", field);
+    SmartDashboard.putData("Field", field);
 
-        // Logger setup for AdvantageScope
-        Logger.recordMetadata("ProjectName", "MyRobotProject");
-        Logger.recordMetadata("RobotName", "MyRobot");
+    // Logger setup
+    Logger.recordMetadata("ProjectName", "MyRobotProject");
+    Logger.recordMetadata("RobotName", "MyRobot");
 
-        // Add log data receivers
-        if (isReal()) {
-            Logger.addDataReceiver(new WPILOGWriter("/media/sda1/")); // USB logging
-            Logger.addDataReceiver(new NT4Publisher()); // NetworkTables
-        } else {
-            String logPath = LogFileUtil.findReplayLog(); // Locate replay log
-            Logger.setReplaySource(new WPILOGReader(logPath)); // Replay from log
-            Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save new log
-        }
-
-        // Log Choreo trajectory
-        trajectory.ifPresent(t -> {
-            // Convert the trajectory to a supported format and log it
-            SwerveSample[] samples = t.samples().toArray(new SwerveSample[0]);
-            Logger.recordOutput("Choreo/Trajectory", samples);
-        });
-
-        // Start the logger
-        Logger.start();
+    if (isReal()) {
+        Logger.addDataReceiver(new WPILOGWriter("/media/sda1/"));
+        Logger.addDataReceiver(new NT4Publisher());
+    } else {
+        String logPath = LogFileUtil.findReplayLog();
+        Logger.setReplaySource(new WPILOGReader(logPath));
+        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
     }
+
+    trajectory.ifPresent(t -> Logger.recordOutput("Choreo/Trajectory", t.samples().toArray(new SwerveSample[0])));
+    Logger.start();
+}
 
     @Override
     public void robotPeriodic() {
-        // Run the CommandScheduler to execute scheduled commands
         CommandScheduler.getInstance().run();
 
-        // Log data for the power distribution panel
         if (powerDistribution != null) {
             SmartDashboard.putNumber("PDP Voltage", powerDistribution.getVoltage());
             SmartDashboard.putNumber("PDP Total Current", powerDistribution.getTotalCurrent());
@@ -96,55 +84,40 @@ public class Robot extends LoggedRobot {
             SmartDashboard.putNumber("PDP Temperature", powerDistribution.getTemperature());
         }
 
-        // Log errors or warnings using QFRCLib
         QFRCLib.reportError(ErrorLevel.Critical, "Browned out!");
         QFRCLib.reportError(ErrorLevel.Warning, "Battery Voltage is low");
         QFRCLib.reportError(ErrorLevel.Information, "Robot is ready.");
 
-        // Log swerve module states
         SwerveModuleState[] states = new SwerveModuleState[]{
-                new SwerveModuleState(), // Replace with actual states
+                new SwerveModuleState(), 
                 new SwerveModuleState(),
                 new SwerveModuleState(),
                 new SwerveModuleState()
         };
         Logger.recordOutput("SwerveModuleStates", states);
 
-        // Log pose information
-        Pose3d poseA = new Pose3d(); // Replace with actual pose
-        Pose3d poseB = new Pose3d(); // Replace with actual pose
+        Pose3d poseA = new Pose3d(); 
+        Pose3d poseB = new Pose3d(); 
         Logger.recordOutput("PoseA", poseA);
         Logger.recordOutput("PoseArray", new Pose3d[]{poseA, poseB});
     }
 
     @Override
-    public void autonomousInit() {
-        QFRCLib.setTab("Autonomous");
-
-        // If a trajectory is loaded, get its initial pose
-        if (trajectory.isPresent()) {
-            Optional<Pose2d> initialPose = trajectory.get().getInitialPose(isRedAlliance());
-            if (initialPose.isPresent()) {
-                drive.resetOdometry(initialPose.get()); // Reset odometry to the start of the trajectory
-            }
-        }
-
-        // Reset and start the timer
-        timer.restart();
-    }
-
-    @Override
     public void teleopPeriodic() {
         // Trigger alignment to target
-        if (drivestick.getAButtonPressed()) {
+        if (drivestick.getRawButton(1) && !drivestick.getRawButton(2)) { // Button 1 on joystick
             new AlignToTargetCommand(drive, vision, drivestick).schedule();
         }
 
+        if (drivestick.getRawButton(3) && drivestick.getRawButton(4)) { // Button 3 and 4 together
+            drive.setGyroZero();
+        }
+
         // Toggle vision camera driver mode
-        if (drivestick.getLeftBumperPressed()) {
-            vision.setPipeline(0); // Switch to driver mode pipeline
-        } else if (drivestick.getLeftBumperReleased()) {
-            vision.setPipeline(1); // Switch back to target pipeline
+        if (drivestick.getRawButtonPressed(5)) { // Button 5 pressed
+            vision.setPipeline(0); 
+        } else if (drivestick.getRawButtonReleased(5)) {
+            vision.setPipeline(1); 
         }
     }
 

@@ -18,7 +18,7 @@ import frc.robot.Subsystems.Constant.DebugSetting;
 import frc.robot.Subsystems.Constant.DriveConstants;
 
 public class TeleopSwerve extends Command {
-    private XboxController controller;
+    private Joystick controller;
     private DriveTrainSubsystem swerveDrive;
 
     /**
@@ -26,7 +26,7 @@ public class TeleopSwerve extends Command {
      * @param swerveDrive The drive train subsystem
      * @param controller A joystick
      */
-    public TeleopSwerve(DriveTrainSubsystem swerveDrive, XboxController controller){
+    public TeleopSwerve(DriveTrainSubsystem swerveDrive, Joystick controller){
         this.controller = controller;
         this.swerveDrive = swerveDrive;
         addRequirements((SubsystemBase)swerveDrive);
@@ -42,7 +42,7 @@ public class TeleopSwerve extends Command {
     public void execute(){
         if (DriverStation.isAutonomous()){
             return;
-        } else if (controller.getRightTriggerAxis() > 0.1) {
+        } else if (controller.getRawButton(7) ) {
             return;
         } else {
             double xAxis;
@@ -51,11 +51,11 @@ public class TeleopSwerve extends Command {
             double speedMod = 1;
         // This chunk of code locks certain joystick directions if buttons are pressed
 
-            yAxis = -controller.getLeftY();
+            yAxis = -controller.getY();
 
-            xAxis = -controller.getLeftX();
+            xAxis = -controller.getX();
 
-            zAxis = controller.getRightX();
+            zAxis = controller.getTwist();
 
         // Power Array Auto Align Code
         // Conditional is a check for having a combination of buttons pressed
@@ -74,7 +74,7 @@ public class TeleopSwerve extends Command {
             }
             Translation2d translation = new Translation2d(yAxis, xAxis).times(DriveConstants.maxRobotSpeedmps);
             swerveDrive.drive(translation, rotation);
-            if(controller.getAButton() && controller.getBButton()) {
+            if(controller.getRawButton(1) && controller.getRawButton(2)) {
                 swerveDrive.setGyroZero();
             }
         }
