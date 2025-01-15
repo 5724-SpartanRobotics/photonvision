@@ -72,8 +72,10 @@ public class SwerveModule {
     }
 
     private void resetTurnToAbsolute() {
+        var absPos = canCoder.getAbsolutePosition();
+        double absPosn = absPos.getValueAsDouble();//rotations
         double absolutePosition = Conversions.radiansToFalcon(
-            (Units.degreesToRadians(canCoder.getAbsolutePosition().getValueAsDouble())) - offset
+            (absPosn * Constant.TwoPI) - offset
         );
 
         if (DebugSetting.TraceLevel == DebugLevel.Swerve || DebugSetting.TraceLevel == DebugLevel.All) {
@@ -138,7 +140,7 @@ public class SwerveModule {
                 Conversions.falconToRadians(turnMotor.getPosition().getValueAsDouble())
             ));
             SmartDashboard.putNumber(canCoderName, Units.radiansToDegrees(
-                (Units.degreesToRadians(canCoder.getAbsolutePosition().getValueAsDouble())) - offset
+                (canCoder.getAbsolutePosition().getValueAsDouble() * Constant.TwoPI) - offset
             ));
             SmartDashboard.putNumber("Drive FB " + moduleName, driveMotor.getPosition().getValueAsDouble());
             SmartDashboard.putNumber("DriveAngle " + moduleName, Units.radiansToDegrees(driveAngle));

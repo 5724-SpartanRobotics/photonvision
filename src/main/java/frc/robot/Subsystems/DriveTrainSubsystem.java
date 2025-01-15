@@ -109,7 +109,11 @@ public class DriveTrainSubsystem extends SubsystemBase {
         if (DebugSetting.TraceLevel == DebugLevel.Swerve || DebugSetting.TraceLevel == DebugLevel.All) {
             SmartDashboard.putNumber("RobotPoseX", robotPose.getX());
             SmartDashboard.putNumber("RobotPoseY", robotPose.getY());
-        }
+            LF.periodic();
+            RF.periodic();
+            LB.periodic();
+            RB.periodic();
+       }
     }
 
     @SuppressWarnings("removal")

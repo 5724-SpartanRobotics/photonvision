@@ -74,7 +74,7 @@ public class TeleopSwerve extends Command {
             }
             Translation2d translation = new Translation2d(yAxis, xAxis).times(DriveConstants.maxRobotSpeedmps);
             swerveDrive.drive(translation, rotation);
-            if(controller.getRawButton(1) && controller.getRawButton(2)) {
+            if(controller.getRawButton(3)) {
                 swerveDrive.setGyroZero();
             }
         }

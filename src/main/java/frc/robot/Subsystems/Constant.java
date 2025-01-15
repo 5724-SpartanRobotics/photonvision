@@ -61,7 +61,7 @@ public class Constant {
     }
     public static final class DebugSetting{
         //set this to get more values to smart dashboard. Leave it off for competition.
-        public static final DebugLevel TraceLevel = DebugLevel.Off;
+        public static final DebugLevel TraceLevel = DebugLevel.Swerve;
     }
     public static enum DebugLevel{
         Off,

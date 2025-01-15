@@ -105,11 +105,11 @@ public void robotInit() {
     @Override
     public void teleopPeriodic() {
         // Trigger alignment to target
-        if (drivestick.getRawButton(1) && !drivestick.getRawButton(2)) { // Button 1 on joystick
+        if (drivestick.getRawButton(4)) {
             new AlignToTargetCommand(drive, vision, drivestick).schedule();
         }
 
-        if (drivestick.getRawButton(3) && drivestick.getRawButton(4)) { // Button 3 and 4 together
+        if (drivestick.getRawButton(3)) { 
             drive.setGyroZero();
         }
 
