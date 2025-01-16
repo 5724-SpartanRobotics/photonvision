@@ -57,7 +57,8 @@ public class Constant {
         public static final double headingPID = 7.5;
     }
     public static final class ControllerConstants{
-        public static double joystickDeadband = 0.1;//a deadband that you must overcome for the joystick input, otherwise we send 0
+        public static double joystickDeadband = 0.3;//a deadband that you must overcome for the joystick input, otherwise we send 0
+        public static double joystickZDeadband = 0.5;//a deadband that you must overcome for the joystick input, otherwise we send 0
     }
     public static final class DebugSetting{
         //set this to get more values to smart dashboard. Leave it off for competition.

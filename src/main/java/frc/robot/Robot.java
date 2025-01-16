@@ -112,13 +112,6 @@ public void robotInit() {
         if (drivestick.getRawButton(3)) { 
             drive.setGyroZero();
         }
-
-        // Toggle vision camera driver mode
-        if (drivestick.getRawButtonPressed(5)) { // Button 5 pressed
-            vision.setPipeline(0); 
-        } else if (drivestick.getRawButtonReleased(5)) {
-            vision.setPipeline(1); 
-        }
     }
 
     private boolean isRedAlliance() {

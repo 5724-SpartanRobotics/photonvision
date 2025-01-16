@@ -59,7 +59,7 @@ public class AlignToTargetCommand extends Command {
         }
 
         // Auto-align when requested
-        if (targetVisible && drivestick.getRawButton(1)) { // Button 1 for alignment
+        if (targetVisible && drivestick.getRawButton(4)) { // Button 1 for alignment
             // Override the driver's turn command with an automatic one that turns toward the tag
             turn = -1.0 * targetYaw * VISION_TURN_kP * Constant.DriveConstants.maxAngularVelocityRadps;
         }
