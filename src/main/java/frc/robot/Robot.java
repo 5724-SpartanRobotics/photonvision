@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.QFRCLib.ErrorLevel;
 import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
+import frc.robot.Subsystems.Constant.ControllerConstants;
 import frc.robot.commands.AlignToTargetCommand;
 import frc.robot.commands.TeleopSwerve;
 
@@ -55,6 +56,9 @@ public void robotInit() {
     powerDistribution = new PowerDistribution(0, ModuleType.kCTRE);
 
     SmartDashboard.putData("Field", field);
+
+    SmartDashboard.putNumber("joystickDeadband", 0.1);
+    SmartDashboard.putNumber("joystickZDeadband", 0.5);
 
     // Logger setup
     Logger.recordMetadata("ProjectName", "MyRobotProject");
@@ -105,11 +109,11 @@ public void robotInit() {
     @Override
     public void teleopPeriodic() {
         // Trigger alignment to target
-        if (drivestick.getRawButton(4)) {
+        if (drivestick.getRawButton(ControllerConstants.ButtonMap.TagLockon)) {
             new AlignToTargetCommand(drive, vision, drivestick).schedule();
         }
 
-        if (drivestick.getRawButton(3)) { 
+        if (drivestick.getRawButton(ControllerConstants.ButtonMap.GyroZero)) { 
             drive.setGyroZero();
         }
     }

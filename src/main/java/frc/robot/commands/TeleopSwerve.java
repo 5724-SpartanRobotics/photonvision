@@ -55,16 +55,19 @@ public class TeleopSwerve extends Command {
 
             xAxis = -controller.getX();
 
-            zAxis = controller.getTwist();
+            zAxis = -controller.getTwist();
 
         // Power Array Auto Align Code
         // Conditional is a check for having a combination of buttons pressed
 
+
+            double joystickDeadband = SmartDashboard.getNumber("joystickDeadband", ControllerConstants.joystickDeadband);
+            double joystickZDeadband = SmartDashboard.getNumber("joystickZDeadband", ControllerConstants.joystickZDeadband);
         
         
-            yAxis = (Math.abs(yAxis) < ControllerConstants.joystickDeadband) ? 0 : yAxis * speedMod;
-            xAxis = (Math.abs(xAxis) < ControllerConstants.joystickDeadband) ? 0 : xAxis * speedMod;
-            zAxis = (Math.abs(zAxis) < ControllerConstants.joystickZDeadband) ? 0 : zAxis * speedMod;
+            yAxis = (Math.abs(yAxis) < joystickDeadband) ? 0 : yAxis * speedMod;
+            xAxis = (Math.abs(xAxis) < joystickDeadband) ? 0 : xAxis * speedMod;
+            zAxis = (Math.abs(zAxis) < joystickZDeadband) ? 0 : zAxis * speedMod;
 
             double rotation = zAxis * DriveConstants.maxAngularVelocityRadps;
             if (DebugSetting.TraceLevel == DebugLevel.Swerve) {
