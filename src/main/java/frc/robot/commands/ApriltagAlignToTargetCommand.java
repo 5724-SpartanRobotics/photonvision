@@ -11,7 +11,7 @@ import frc.robot.Subsystems.Constant;
 
 import java.util.List;
 
-public class AlignToTargetCommand extends Command {
+public class ApriltagAlignToTargetCommand extends Command {
     private final DriveTrainSubsystem driveTrain;
     private final PhotonVisionSubsystem vision;
     private final PIDController pidController;
@@ -19,7 +19,7 @@ public class AlignToTargetCommand extends Command {
 
     private final double VISION_TURN_kP = 0.01F;
 
-    public AlignToTargetCommand(
+    public ApriltagAlignToTargetCommand(
     DriveTrainSubsystem driveTrain,
     PhotonVisionSubsystem vision,
     Joystick drivestick

@@ -29,11 +29,13 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.QFRCLib.ErrorLevel;
 import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
 import frc.robot.Subsystems.Constant.ControllerConstants;
-import frc.robot.commands.AlignToTargetCommand;
+import frc.robot.commands.ApriltagAlignToTargetCommand;
+import frc.robot.commands.LimelightAlignToTargetCommand;
 import frc.robot.commands.TeleopSwerve;
 
 public class Robot extends LoggedRobot {
@@ -53,7 +55,6 @@ public void robotInit() {
     drive = new DriveTrainSubsystem();
     vision = new PhotonVisionSubsystem("Front");
     PortForwarder.add(5800, "photonvision.local", 5800);
-
 
     // Pass DriveTrainSubsystem and Joystick to TeleopSwerve
     drive.setDefaultCommand(new TeleopSwerve(drive, drivestick));
@@ -127,8 +128,12 @@ public void robotInit() {
     @Override
     public void teleopPeriodic() {
         // Trigger alignment to target
-        if (drivestick.getRawButton(ControllerConstants.ButtonMap.TagLockon)) {
-            new AlignToTargetCommand(drive, vision, drivestick).schedule();
+        if (drivestick.getRawButton(ControllerConstants.ButtonMap.TagLockon) || drivestick.getRawButton(11)) {
+            new ApriltagAlignToTargetCommand(drive, vision, drivestick).schedule();
+        }
+
+        if (drivestick.getRawButton(ControllerConstants.ButtonMap.ObjectLockon)) {
+            new LimelightAlignToTargetCommand(drive, drivestick).schedule();
         }
 
         if (drivestick.getRawButton(ControllerConstants.ButtonMap.GyroZero)) { 

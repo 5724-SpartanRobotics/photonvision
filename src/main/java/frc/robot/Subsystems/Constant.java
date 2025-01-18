@@ -63,6 +63,7 @@ public class Constant {
         public static final class ButtonMap {
             public static final int GyroZero = 7;
             public static final int TagLockon = 1;
+            public static final int ObjectLockon = 2;
         }
     }
     public static final class DebugSetting{
