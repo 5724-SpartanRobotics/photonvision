@@ -47,7 +47,7 @@ public class Robot extends LoggedRobot {
     @Override
 public void robotInit() {
     drive = new DriveTrainSubsystem();
-    vision = new PhotonVisionSubsystem("limelight");
+    vision = new PhotonVisionSubsystem("Front");
 
     // Pass DriveTrainSubsystem and Joystick to TeleopSwerve
     drive.setDefaultCommand(new TeleopSwerve(drive, drivestick));
