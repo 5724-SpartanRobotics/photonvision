@@ -12,10 +12,14 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import choreo.Choreo;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
+import choreo.auto.AutoFactory;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -48,6 +52,8 @@ public class Robot extends LoggedRobot {
 public void robotInit() {
     drive = new DriveTrainSubsystem();
     vision = new PhotonVisionSubsystem("Front");
+    PortForwarder.add(5800, "photonvision.local", 5800);
+
 
     // Pass DriveTrainSubsystem and Joystick to TeleopSwerve
     drive.setDefaultCommand(new TeleopSwerve(drive, drivestick));
@@ -104,6 +110,18 @@ public void robotInit() {
         Pose3d poseB = new Pose3d(); 
         Logger.recordOutput("PoseA", poseA);
         Logger.recordOutput("PoseArray", new Pose3d[]{poseA, poseB});
+    }
+    @Override
+    public void autonomousInit() {
+        // Reset and start the timer for auto mode
+        timer.reset();
+        timer.start();
+
+        // Reset odometry if trajectory is loaded
+        trajectory.ifPresent(t -> {
+            Optional<Pose2d> initialPose = t.getInitialPose(isRedAlliance());
+            initialPose.ifPresent(pose -> drive.resetOdometry(pose));
+        });
     }
 
     @Override
