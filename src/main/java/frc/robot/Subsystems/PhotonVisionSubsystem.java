@@ -14,6 +14,21 @@ public class PhotonVisionSubsystem extends SubsystemBase {
         camera = new PhotonCamera(cameraName); 
     }
 
+    public PhotonTrackedTarget getBestResult() {
+        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+        if (!results.isEmpty()) {
+            var latestResult = results.get(results.size() - 1);
+    
+            if (latestResult.hasTargets()) {
+                return latestResult.getTargets().stream()
+                        .max((a, b) -> Double.compare(a.getPoseAmbiguity(), b.getPoseAmbiguity()))
+                        .orElse(null);
+            }
+            return null;
+        }
+        return null;
+    }
+
     public boolean hasTarget() {
         return camera.getLatestResult().hasTargets();
     }

@@ -59,7 +59,7 @@ public class LimelightAlignToTargetCommand extends Command {
         }
 
         // Auto-align when requested
-        if (useTarget && drivestick.getRawButton(2)) { // Button 1 for alignment
+        if (useTarget) { // Button 1 for alignment
             // Override the driver's turn command with an automatic one that turns toward the tag
             turn = -1.0 * ta * VISION_TURN_kP * Constant.DriveConstants.maxAngularVelocityRadps;
         }
