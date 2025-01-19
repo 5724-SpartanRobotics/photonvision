@@ -13,43 +13,15 @@ import frc.robot.Subsystems.Constant.AutoConstants;
 
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import frc.robot.Subsystems.ApriltagLockon;
+import frc.robot.Subsystems.ApriltagLockonSubsystem;
 import frc.robot.Subsystems.Constant;
+import frc.robot.Subsystems.Constant.HelixPIDController;
 
 import java.util.List;
 
 public class ApriltagAlignToTargetCommand extends Command {
-    public static class HelixPIDController {
-        public double kP, kD;
-        private double kI;
-        private double d, i, lastError;
-        public double reference, inputRange;
-        public boolean continuous;
-
-        public HelixPIDController(double P, double I, double D) {
-            this.kP = P; this.kI = I; this.kD = D;
-            i = 0; lastError = 0;
-            inputRange = Double.POSITIVE_INFINITY;
-            continuous = false;
-        }
-
-        public double calculate(double state, double dt) {
-            double error = (reference - state) % inputRange;
-            if (Math.abs(error) > inputRange / 2) {
-                if (error > 0) error -= inputRange;
-                else error += inputRange;
-            }
-            if (dt > 0) {
-                d = (error - lastError) / dt;
-                i += error *dt;
-            }
-            lastError = error;
-            return kP * error + kI * i + kD * d;
-        }
-    }
-
     private DriveTrainSubsystem driveTrain;
-    private ApriltagLockon tagLockon;
+    private ApriltagLockonSubsystem tagLockon;
     private Pose2d targetPose;
     private double targetDistance;
     private Joystick driver;
@@ -65,7 +37,7 @@ public class ApriltagAlignToTargetCommand extends Command {
     // TODO: Find out the units of distance (meters/ft/etc)
     public ApriltagAlignToTargetCommand(
         DriveTrainSubsystem driveTrain,
-        ApriltagLockon tagLockon,
+        ApriltagLockonSubsystem tagLockon,
         Pose2d targetPose,
         double distance, 
         Joystick driver,

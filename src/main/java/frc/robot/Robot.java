@@ -34,7 +34,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.QFRCLib.ErrorLevel;
-import frc.robot.Subsystems.ApriltagLockon;
+import frc.robot.Subsystems.ApriltagLockonSubsystem;
 import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
 import frc.robot.Subsystems.Constant.ControllerConstants;
@@ -52,7 +52,7 @@ public class Robot extends LoggedRobot {
     private Field2d field = new Field2d();
     private Timer timer = new Timer();
 
-    private ApriltagLockon apriltagLockon;
+    private ApriltagLockonSubsystem apriltagLockon;
     private Command setPos;
 
     // Choreo trajectory support
@@ -62,7 +62,7 @@ public class Robot extends LoggedRobot {
     public void robotInit() {
         drive = new DriveTrainSubsystem();
         vision = new PhotonVisionSubsystem("Front");
-        apriltagLockon = new ApriltagLockon(drive, vision, drivestick);
+        apriltagLockon = new ApriltagLockonSubsystem(drive, vision, drivestick);
         PortForwarder.add(5800, "photonvision.local", 5800);
 
         // Pass DriveTrainSubsystem and Joystick to TeleopSwerve

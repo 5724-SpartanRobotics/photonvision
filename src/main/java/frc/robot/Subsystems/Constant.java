@@ -7,6 +7,35 @@ public class Constant {
     public static final double TwoPI = Math.PI * 2;
     public static final double HalfPI = Math.PI / 2;
 
+    public static class HelixPIDController {
+        public double kP, kD;
+        private double kI;
+        private double d, i, lastError;
+        public double reference, inputRange;
+        public boolean continuous;
+
+        public HelixPIDController(double P, double I, double D) {
+            this.kP = P; this.kI = I; this.kD = D;
+            i = 0; lastError = 0;
+            inputRange = Double.POSITIVE_INFINITY;
+            continuous = false;
+        }
+
+        public double calculate(double state, double dt) {
+            double error = (reference - state) % inputRange;
+            if (Math.abs(error) > inputRange / 2) {
+                if (error > 0) error -= inputRange;
+                else error += inputRange;
+            }
+            if (dt > 0) {
+                d = (error - lastError) / dt;
+                i += error *dt;
+            }
+            lastError = error;
+            return kP * error + kI * i + kD * d;
+        }
+    }
+
     public static final class CanIdConstants{
         public static final int LFTurnMotor = 2;//falcon500
         public static final int LFDriveMotor = 3;//falcon500

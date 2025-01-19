@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Constant.AutoConstants;
 
-public class ApriltagLockon extends SubsystemBase {
+public class ApriltagLockonSubsystem extends SubsystemBase {
     private final DriveTrainSubsystem driveTrain;
     private final PhotonVisionSubsystem vision;
     private final PIDController pidController;
@@ -27,7 +27,7 @@ public class ApriltagLockon extends SubsystemBase {
     public double VISION_DRIVE_kP = 0.1F;
     public double VISION_DEADBAND = 0.1F;
 
-    public ApriltagLockon(
+    public ApriltagLockonSubsystem(
         DriveTrainSubsystem driveTrain,
         PhotonVisionSubsystem vision,
         Joystick drivestick
