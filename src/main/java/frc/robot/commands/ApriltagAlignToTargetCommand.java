@@ -1,16 +1,159 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
+import frc.robot.Subsystems.Constant.AutoConstants;
+
 import org.photonvision.targeting.PhotonTrackedTarget;
+
+import frc.robot.Subsystems.ApriltagLockon;
 import frc.robot.Subsystems.Constant;
 
 import java.util.List;
 
+public class ApriltagAlignToTargetCommand extends Command {
+    public static class HelixPIDController {
+        public double kP, kD;
+        private double kI;
+        private double d, i, lastError;
+        public double reference, inputRange;
+        public boolean continuous;
+
+        public HelixPIDController(double P, double I, double D) {
+            this.kP = P; this.kI = I; this.kD = D;
+            i = 0; lastError = 0;
+            inputRange = Double.POSITIVE_INFINITY;
+            continuous = false;
+        }
+
+        public double calculate(double state, double dt) {
+            double error = (reference - state) % inputRange;
+            if (Math.abs(error) > inputRange / 2) {
+                if (error > 0) error -= inputRange;
+                else error += inputRange;
+            }
+            if (dt > 0) {
+                d = (error - lastError) / dt;
+                i += error *dt;
+            }
+            lastError = error;
+            return kP * error + kI * i + kD * d;
+        }
+    }
+
+    private DriveTrainSubsystem driveTrain;
+    private ApriltagLockon tagLockon;
+    private Pose2d targetPose;
+    private double targetDistance;
+    private Joystick driver;
+    private boolean autoDrive;
+
+    private Pose2d initPose;
+    private Timer _timer = new Timer();
+    private HelixPIDController xPID, yPID, thetaPID;
+    private double lastTime = 0;
+    private boolean robotCanDrive;
+    private boolean isAuto;
+
+    // TODO: Find out the units of distance (meters/ft/etc)
+    public ApriltagAlignToTargetCommand(
+        DriveTrainSubsystem driveTrain,
+        ApriltagLockon tagLockon,
+        Pose2d targetPose,
+        double distance, 
+        Joystick driver,
+        boolean autonomousDriving
+    ) {
+        addRequirements(driveTrain);
+        this.driveTrain = driveTrain;
+        this.tagLockon = tagLockon;
+        this.targetPose = targetPose;
+        this.targetDistance = distance;
+        this.driver = driver;
+        this.autoDrive = autonomousDriving;
+    }
+
+    @Override
+    public void initialize() {
+        initPose = driveTrain.getPose();
+        _timer.reset();
+        _timer.start();
+
+        xPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
+        yPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
+
+        thetaPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
+        thetaPID.continuous = true;
+        thetaPID.inputRange = Constant.TwoPI;
+
+        lastTime = 0;
+        tagLockon._drive_2024apriltagbase(targetDistance);
+        robotCanDrive = true;
+    }
+
+    @Override
+    public void execute() {
+        double time = _timer.get();
+        double dt = time - lastTime;
+        Pose2d currPose = driveTrain.getPose();
+        xPID.reference = -targetPose.getX();
+        yPID.reference = -targetPose.getY();
+        thetaPID.reference = Units.degreesToRadians(tagLockon.getTheta());
+
+        double vx = xPID.calculate(currPose.getX(), dt);
+        double vy = yPID.calculate(currPose.getY(), dt);
+        double omega = -thetaPID.calculate(driveTrain.getGyroHeading().getRadians(), dt);
+
+        double cap = 1.5;
+        int omegacap = 3;
+        if(vx > cap) vx = cap;
+        else if(vx < -cap) vx = -cap;
+        if(vy > cap) vy = cap;
+        else if(vy < -cap) vy = -cap;
+        if(omega > omegacap) omega = omegacap;
+        else if(omega < -omegacap) omega = -omegacap;
+
+        lastTime = time;
+        if (
+            Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) < AutoConstants.autoShootCloseness &&
+            Math.abs(tagLockon.getTheta() - driveTrain.getGyroHeading().getDegrees()) < AutoConstants.degreesError
+        ) {
+            // Intake, do another thing, etc.
+            robotCanDrive = false;
+        }
+
+        if (robotCanDrive) driveTrain.drive(new Translation2d(vx, vy), omega);
+        else driveTrain.drive();
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        _timer.stop();
+        driveTrain.brake();
+    }
+
+    @Override
+    public boolean isFinished() {
+        boolean retVal = false;
+        if (isAuto) {
+            // 2024... time checks on the shooter (see if 2s had elapsed)
+            return true;
+        } else if (!driver.getRawButton(Constant.ControllerConstants.ButtonMap.OuttakePiece)) {
+            retVal = true;
+            // 2024... turn off the shooter.
+        }
+        return retVal;
+    }
+}
+
+/*
 public class ApriltagAlignToTargetCommand extends Command {
     private final DriveTrainSubsystem driveTrain;
     private final PhotonVisionSubsystem vision;
@@ -82,3 +225,4 @@ public class ApriltagAlignToTargetCommand extends Command {
         driveTrain.drive(new Translation2d(0.0, 0.0), 0.0);
     }
 }
+*/

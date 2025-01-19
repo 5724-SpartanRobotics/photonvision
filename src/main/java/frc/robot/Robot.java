@@ -18,6 +18,8 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -28,6 +30,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.QFRCLib.ErrorLevel;
@@ -35,6 +38,7 @@ import frc.robot.Subsystems.ApriltagLockon;
 import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
 import frc.robot.Subsystems.Constant.ControllerConstants;
+import frc.robot.Subsystems.Constant.DriveConstants;
 import frc.robot.commands.ApriltagAlignToTargetCommand;
 import frc.robot.commands.LimelightAlignToTargetCommand;
 import frc.robot.commands.TeleopSwerve;
@@ -49,6 +53,7 @@ public class Robot extends LoggedRobot {
     private Timer timer = new Timer();
 
     private ApriltagLockon apriltagLockon;
+    private Command setPos;
 
     // Choreo trajectory support
     private final Optional<Trajectory<SwerveSample>> trajectory = Choreo.loadTrajectory("myTrajectory");
@@ -132,12 +137,13 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopPeriodic() {
-        // Trigger alignment to target
-        if (drivestick.getRawButton(ControllerConstants.ButtonMap.TagLockon) || drivestick.getRawButton(11)) {
-            apriltagLockon.drive();
+        if (drivestick.getRawButton(ControllerConstants.ButtonMap.TagLockon) || drivestick.getRawButton(ControllerConstants.ButtonMap.TagLockonAlt)) {
+            Pose2d targetPose = new Pose2d(new Translation2d(0, 0), new Rotation2d());
+            setPos = new ApriltagAlignToTargetCommand(drive, apriltagLockon, targetPose, 3 /* DriveConstants.speakerDistance */, drivestick, false);
+            setPos.execute();
         }
 
-        if (drivestick.getRawButton(ControllerConstants.ButtonMap.ObjectLockon)) {
+        if (drivestick.getRawButton(ControllerConstants.ButtonMap.ObjectLockon) || drivestick.getRawButton(ControllerConstants.ButtonMap.ObjectLockonAlt)) {
             new LimelightAlignToTargetCommand(drive, drivestick).schedule();
         }
 
