@@ -64,6 +64,7 @@ public class Robot extends LoggedRobot {
         vision = new PhotonVisionSubsystem("Front");
         apriltagLockon = new ApriltagLockon(drive, vision, drivestick);
         PortForwarder.add(5800, "photonvision.local", 5800);
+        PortForwarder.add(5801, "limelight.local", 5801);
 
         // Pass DriveTrainSubsystem and Joystick to TeleopSwerve
         drive.setDefaultCommand(new TeleopSwerve(drive, drivestick));
@@ -108,7 +109,7 @@ public class Robot extends LoggedRobot {
         QFRCLib.reportError(ErrorLevel.Warning, "Battery Voltage is low");
         QFRCLib.reportError(ErrorLevel.Information, "Robot is ready.");
 
-        SwerveModuleState[] states = new SwerveModuleState[]{
+        SwerveModuleState[] states = new SwerveModuleState[] {
                 new SwerveModuleState(), 
                 new SwerveModuleState(),
                 new SwerveModuleState(),
@@ -119,7 +120,7 @@ public class Robot extends LoggedRobot {
         Pose3d poseA = new Pose3d(); 
         Pose3d poseB = new Pose3d(); 
         Logger.recordOutput("PoseA", poseA);
-        Logger.recordOutput("PoseArray", new Pose3d[]{poseA, poseB});
+        Logger.recordOutput("PoseArray", new Pose3d[] {poseA, poseB});
     }
 
     @Override
