@@ -1,7 +1,11 @@
 package frc.robot.Subsystems;
 
+import org.photonvision.targeting.PhotonTrackedTarget;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Constant {
     public static final double TwoPI = Math.PI * 2;
@@ -33,6 +37,55 @@ public class Constant {
             }
             lastError = error;
             return kP * error + kI * i + kD * d;
+        }
+    }
+
+    public static abstract class LockonSubsystem extends SubsystemBase {
+        public static class TagReading {
+            public double distance;
+            public double angle;
+    
+            public TagReading(double dist, double angle) {
+                this.distance = dist;
+                this.angle = angle;
+            }
+        }
+
+        /**
+         * @param driveTrain
+         * @param targetYaw
+         * @param speedMod
+         * @return Returns lastTheta.
+         */
+        public double drive(DriveTrainSubsystem driveTrain, double speedMod) {
+            double targetDistance = 0; // PARAM
+            String tagName = "36h11"; // PARAM
+
+            double distance_ft = getDistance();
+            if (distance_ft != Double.NEGATIVE_INFINITY) {
+                double theta = -getTheta() + driveTrain.getGyroHeading().getDegrees() - /* AutoConstants.cameraAngleOffset */ 0;
+                double delta_d_m = Units.feetToMeters(distance_ft - targetDistance + /* AutoConstants.cameraDepthOffset */ 0);
+                double delta_x = -delta_d_m * Math.sin(Units.degreesToRadians(theta));
+                double delta_y = delta_d_m * Math.cos(Units.degreesToRadians(theta));
+                Translation2d dTranslation = new Translation2d(-delta_y, delta_x);
+                Pose2d pose = new Pose2d(dTranslation, driveTrain.getGyroHeading().times(-1F));
+                driveTrain.ZeroDriveSensors(pose);
+                return theta;
+            } else {
+                Translation2d dTranslation = new Translation2d(0, 0);
+                Pose2d pose = new Pose2d(dTranslation, driveTrain.getGyroHeading().times(-1F));
+                driveTrain.ZeroDriveSensors(pose);
+                return driveTrain.getGyroHeading().getDegrees();
+            }
+        };
+        public Double getDistance() {
+            return 0D;
+        };
+        public double getTheta() {
+            return 0F;
+        };
+        public TagReading getReading() {
+            return new TagReading(getDistance(), getTheta());
         }
     }
 
@@ -122,5 +175,7 @@ public class Constant {
         public static final double cameraDepthOffset = 1;
         public static final double kPAutoShoot = 6;
         public static final double kPTurnAutoShoot = 12;
+
+        public static final String kLimelightName = "Gamepiecedetection";
     }
 }

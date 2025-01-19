@@ -3,7 +3,6 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +15,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import frc.robot.Subsystems.ApriltagLockonSubsystem;
 import frc.robot.Subsystems.Constant;
 import frc.robot.Subsystems.Constant.HelixPIDController;
+import frc.robot.Subsystems.Constant.LockonSubsystem;
 
 import java.util.List;
 
@@ -66,18 +66,19 @@ public class ApriltagAlignToTargetCommand extends Command {
         thetaPID.inputRange = Constant.TwoPI;
 
         lastTime = 0;
-        tagLockon._drive_2024apriltagbase(targetDistance);
+        tagLockon.drive(driveTrain, 1);
         robotCanDrive = true;
     }
 
     @Override
     public void execute() {
+        LockonSubsystem.TagReading reading = tagLockon.getReading();
         double time = _timer.get();
         double dt = time - lastTime;
         Pose2d currPose = driveTrain.getPose();
         xPID.reference = -targetPose.getX();
         yPID.reference = -targetPose.getY();
-        thetaPID.reference = Units.degreesToRadians(tagLockon.getTheta());
+        thetaPID.reference = Units.degreesToRadians(reading.angle);
 
         double vx = xPID.calculate(currPose.getX(), dt);
         double vy = yPID.calculate(currPose.getY(), dt);
@@ -95,7 +96,7 @@ public class ApriltagAlignToTargetCommand extends Command {
         lastTime = time;
         if (
             Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) < AutoConstants.autoShootCloseness &&
-            Math.abs(tagLockon.getTheta() - driveTrain.getGyroHeading().getDegrees()) < AutoConstants.degreesError
+            Math.abs(reading.angle - driveTrain.getGyroHeading().getDegrees()) < AutoConstants.degreesError
         ) {
             // Intake, do another thing, etc.
             robotCanDrive = false;

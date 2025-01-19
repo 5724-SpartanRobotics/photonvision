@@ -36,6 +36,7 @@ import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.QFRCLib.ErrorLevel;
 import frc.robot.Subsystems.ApriltagLockonSubsystem;
 import frc.robot.Subsystems.DriveTrainSubsystem;
+import frc.robot.Subsystems.LimelightLockonSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
 import frc.robot.Subsystems.Constant.ControllerConstants;
 import frc.robot.Subsystems.Constant.DriveConstants;
@@ -53,6 +54,7 @@ public class Robot extends LoggedRobot {
     private Timer timer = new Timer();
 
     private ApriltagLockonSubsystem apriltagLockon;
+    private LimelightLockonSubsystem limelightLockon;
     private Command setPos;
 
     // Choreo trajectory support
@@ -63,6 +65,7 @@ public class Robot extends LoggedRobot {
         drive = new DriveTrainSubsystem();
         vision = new PhotonVisionSubsystem("Front");
         apriltagLockon = new ApriltagLockonSubsystem(drive, vision, drivestick);
+        limelightLockon = new LimelightLockonSubsystem(drive);
         PortForwarder.add(5800, "photonvision.local", 5800);
 
         // Pass DriveTrainSubsystem and Joystick to TeleopSwerve
@@ -138,13 +141,15 @@ public class Robot extends LoggedRobot {
     @Override
     public void teleopPeriodic() {
         if (drivestick.getRawButton(ControllerConstants.ButtonMap.TagLockon) || drivestick.getRawButton(ControllerConstants.ButtonMap.TagLockonAlt)) {
-            Pose2d targetPose = new Pose2d(new Translation2d(0, 0), new Rotation2d());
+            Pose2d targetPose = new Pose2d(new Translation2d(), new Rotation2d());
             setPos = new ApriltagAlignToTargetCommand(drive, apriltagLockon, targetPose, 3 /* DriveConstants.speakerDistance */, drivestick, false);
             setPos.execute();
         }
 
         if (drivestick.getRawButton(ControllerConstants.ButtonMap.ObjectLockon) || drivestick.getRawButton(ControllerConstants.ButtonMap.ObjectLockonAlt)) {
-            new LimelightAlignToTargetCommand(drive, drivestick).schedule();
+            Pose2d targetPose = new Pose2d(new Translation2d(), new Rotation2d());
+            setPos = new LimelightAlignToTargetCommand(drive, limelightLockon, targetPose, 3, drivestick, false);
+            setPos.execute();
         }
 
         if (drivestick.getRawButton(ControllerConstants.ButtonMap.GyroZero)) { 
