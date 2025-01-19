@@ -8,6 +8,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.littletonrobotics.urcl.URCL;
 
 import choreo.Choreo;
 import choreo.trajectory.SwerveSample;
@@ -22,6 +23,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -62,25 +64,11 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotInit() {
-        drive = new DriveTrainSubsystem();
-        vision = new PhotonVisionSubsystem("Front");
-        apriltagLockon = new ApriltagLockonSubsystem(drive, vision, drivestick);
-        limelightLockon = new LimelightLockonSubsystem(drive);
-        PortForwarder.add(5800, "photonvision.local", 5800);
-        PortForwarder.add(5801, "limelight.local", 5801);
-
-        // Pass DriveTrainSubsystem and Joystick to TeleopSwerve
-        drive.setDefaultCommand(new TeleopSwerve(drive, drivestick));
-
-        // Initialize power distribution
-        powerDistribution = new PowerDistribution(0, ModuleType.kCTRE);
-
-        SmartDashboard.putData("Field", field);
-
-        SmartDashboard.putNumber("joystickDeadband", 0.1);
-        SmartDashboard.putNumber("joystickZDeadband", 0.5);
+        DataLogManager.start();
+        DriverStation.startDataLog(DataLogManager.getLog());
 
         // Logger setup
+        Logger.registerURCL(URCL.startExternal());
         Logger.recordMetadata("ProjectName", "MyRobotProject");
         Logger.recordMetadata("RobotName", "MyRobot");
 
@@ -92,9 +80,25 @@ public class Robot extends LoggedRobot {
             Logger.setReplaySource(new WPILOGReader(logPath));
             Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
         }
+        Logger.start();
+
+        SmartDashboard.putData("Field", field);
+
+        SmartDashboard.putNumber("joystickDeadband", 0.1);
+        SmartDashboard.putNumber("joystickZDeadband", 0.5);
 
         trajectory.ifPresent(t -> Logger.recordOutput("Choreo/Trajectory", t.samples().toArray(new SwerveSample[0])));
-        Logger.start();
+
+        drive = new DriveTrainSubsystem();
+        vision = new PhotonVisionSubsystem("Front");
+        apriltagLockon = new ApriltagLockonSubsystem(drive, vision, drivestick);
+        limelightLockon = new LimelightLockonSubsystem(drive);
+        powerDistribution = new PowerDistribution(0, ModuleType.kCTRE);
+        PortForwarder.add(5800, "photonvision.local", 5800);
+        PortForwarder.add(5801, "limelight.local", 5801);
+
+        // Pass DriveTrainSubsystem and Joystick to TeleopSwerve
+        drive.setDefaultCommand(new TeleopSwerve(drive, drivestick));
     }
 
     @Override
