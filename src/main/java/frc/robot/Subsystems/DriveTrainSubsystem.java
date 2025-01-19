@@ -121,7 +121,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
         lastUpdatedGyroHeading = Rotation2d.fromDegrees(-gyro.getAngle());
     }
 
-    public void drive(Translation2d translation, double rotation) {
+    protected void _drive(Translation2d translation, double rotation) {
         SwerveModuleState[] swerveModStates = swerveDriveKinematics.toSwerveModuleStates(
             ChassisSpeeds.fromFieldRelativeSpeeds(
                 translation.getX(), translation.getY(), rotation, getGyroHeading()
@@ -134,6 +134,18 @@ public class DriveTrainSubsystem extends SubsystemBase {
         RF.setDesiredState(swerveModStates[1]);
         LB.setDesiredState(swerveModStates[2]);
         RB.setDesiredState(swerveModStates[3]);
+    }
+
+    public void drive(Translation2d translation, double rotation) {
+        _drive(translation, rotation);
+    }
+
+    public void drive(double rotation) {
+        _drive(new Translation2d(0, 0), rotation);
+    }
+
+    public void drive() {
+        _drive(new Translation2d(0, 0), 0);
     }
 
     public void simulationInit() {
@@ -169,5 +181,11 @@ public class DriveTrainSubsystem extends SubsystemBase {
         RF.setDesiredState(swerveModStates[1]);
         LB.setDesiredState(swerveModStates[2]);
         RB.setDesiredState(swerveModStates[3]);
+    }
+
+    public void brake() {
+        for (SwerveModule module : modules) {
+            module.setDesiredState(new SwerveModuleState(0, module.getState().angle));
+        }
     }
 }
