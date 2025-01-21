@@ -1,10 +1,13 @@
 package frc.robot.Subsystems;
 
+import org.opencv.video.SparsePyrLKOpticalFlow;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import edu.wpi.first.hal.util.HalHandleException;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Constant {
@@ -12,10 +15,14 @@ public class Constant {
     public static final double HalfPI = Math.PI / 2;
 
     public static class HelixPIDController {
-        public double kP, kD;
+        public double kP;
+        public double kD;
         private double kI;
-        private double d, i, lastError;
-        public double reference, inputRange;
+        private double d;
+        private double i;
+        private double lastError;
+        public double reference;
+        public double inputRange;
         public boolean continuous;
 
         public HelixPIDController(double P, double I, double D) {
@@ -38,6 +45,18 @@ public class Constant {
             lastError = error;
             return kP * error + kI * i + kD * d;
         }
+
+        public void setReference(double ref) {
+            reference = ref;
+        }
+
+        public void setContinuous(boolean cont) {
+            continuous = cont;
+        }
+
+        public void setRange(double r) {
+            inputRange = r;
+        }
     }
 
     public static abstract class LockonSubsystem extends SubsystemBase {
@@ -51,13 +70,17 @@ public class Constant {
             }
         }
 
+        public LockonSubsystem() {
+            super();
+        }
+
         /**
          * @param driveTrain
          * @param targetYaw
          * @param speedMod
          * @return Returns lastTheta.
          */
-        public double drive(DriveTrainSubsystem driveTrain, double speedMod) {
+        public double _drive(DriveTrainSubsystem driveTrain, double speedMod) {
             double targetDistance = 0; // PARAM
             String tagName = "36h11"; // PARAM
 
@@ -77,6 +100,21 @@ public class Constant {
                 driveTrain.ZeroDriveSensors(pose);
                 return driveTrain.getGyroHeading().getDegrees();
             }
+        };
+        public double drive(DriveTrainSubsystem driveTrain, Double speedMod) {
+            double speed = speedMod == null ? 1 : speedMod;
+            double photonAngle = Units.degreesToRadians(getTheta());
+            double gyroAngle = driveTrain.getGyroHeading().getRadians();
+            double fX = Math.sin(gyroAngle) * speed;
+            double fY = Math.cos(gyroAngle) * speed;
+            double sV = -speed * photonAngle * 0.005;
+            double sX = Math.sin(gyroAngle + HalfPI) * sV;
+            double sY = Math.cos(gyroAngle + HalfPI) * sV;
+            Translation2d t2d = new Translation2d(fY + sY , fX + sX);
+            driveTrain.drive(t2d, 0);
+            SmartDashboard.putNumber("photonAngle", photonAngle);
+            SmartDashboard.putNumber("gyroAngle", gyroAngle);
+            return photonAngle;
         };
         public Double getDistance() {
             return 0D;

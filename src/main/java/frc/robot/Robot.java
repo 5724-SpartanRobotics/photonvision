@@ -73,12 +73,12 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("RobotName", "MyRobot");
 
         if (isReal()) {
-            Logger.addDataReceiver(new WPILOGWriter("/media/sda1/"));
+            // Logger.addDataReceiver(new WPILOGWriter("/media/sda1/"));
             Logger.addDataReceiver(new NT4Publisher());
         } else {
-            String logPath = LogFileUtil.findReplayLog();
-            Logger.setReplaySource(new WPILOGReader(logPath));
-            Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+            // String logPath = LogFileUtil.findReplayLog();
+            // Logger.setReplaySource(new WPILOGReader(logPath));
+            // Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
         }
         Logger.start();
 

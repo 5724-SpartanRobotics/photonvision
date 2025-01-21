@@ -29,7 +29,9 @@ public class ApriltagAlignToTargetCommand extends Command {
 
     private Pose2d initPose;
     private Timer _timer = new Timer();
-    private HelixPIDController xPID, yPID, thetaPID;
+    private HelixPIDController xPID;
+    private HelixPIDController yPID;
+    private HelixPIDController thetaPID;
     private double lastTime = 0;
     private boolean robotCanDrive;
     private boolean isAuto;
@@ -43,6 +45,7 @@ public class ApriltagAlignToTargetCommand extends Command {
         Joystick driver,
         boolean autonomousDriving
     ) {
+        super();
         addRequirements(driveTrain);
         this.driveTrain = driveTrain;
         this.tagLockon = tagLockon;
@@ -50,35 +53,37 @@ public class ApriltagAlignToTargetCommand extends Command {
         this.targetDistance = distance;
         this.driver = driver;
         this.autoDrive = autonomousDriving;
+
+        this.xPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
+        this.yPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
+        this.thetaPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
     }
 
     @Override
     public void initialize() {
+        super.initialize();
         initPose = driveTrain.getPose();
         _timer.reset();
         _timer.start();
 
-        xPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
-        yPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
-
-        thetaPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
-        thetaPID.continuous = true;
-        thetaPID.inputRange = Constant.TwoPI;
+        thetaPID.setContinuous(true);
+        thetaPID.setRange(Constant.TwoPI);
 
         lastTime = 0;
-        tagLockon.drive(driveTrain, 1);
+        tagLockon.drive(driveTrain, 1D);
         robotCanDrive = true;
     }
 
     @Override
     public void execute() {
+        super.execute();
         LockonSubsystem.TagReading reading = tagLockon.getReading();
         double time = _timer.get();
         double dt = time - lastTime;
         Pose2d currPose = driveTrain.getPose();
-        xPID.reference = -targetPose.getX();
-        yPID.reference = -targetPose.getY();
-        thetaPID.reference = Units.degreesToRadians(reading.angle);
+        xPID.setReference(-targetPose.getX());
+        yPID.setReference(-targetPose.getY());
+        thetaPID.setReference(Units.degreesToRadians(reading.angle));
 
         double vx = xPID.calculate(currPose.getX(), dt);
         double vy = yPID.calculate(currPose.getY(), dt);
@@ -102,18 +107,21 @@ public class ApriltagAlignToTargetCommand extends Command {
             robotCanDrive = false;
         }
 
-        if (robotCanDrive) driveTrain.drive(new Translation2d(vx, vy), omega);
-        else driveTrain.drive();
+        // if (robotCanDrive) tagLockon.drive(driveTrain, 1D);
+        // else driveTrain.drive();
+        tagLockon.drive(driveTrain, 1D);
     }
 
     @Override
     public void end(boolean interrupted) {
+        super.end(interrupted);
         _timer.stop();
         driveTrain.brake();
     }
 
     @Override
     public boolean isFinished() {
+        super.isFinished();
         boolean retVal = false;
         if (isAuto) {
             // 2024... time checks on the shooter (see if 2s had elapsed)

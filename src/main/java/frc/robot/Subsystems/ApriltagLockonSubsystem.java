@@ -34,6 +34,7 @@ public class ApriltagLockonSubsystem extends LockonSubsystem {
         PhotonVisionSubsystem vision,
         Joystick drivestick
     ) {
+        super();
         this.driveTrain = driveTrain;
         this.vision = vision;
         this.drivestick = drivestick; // Assign drivestick

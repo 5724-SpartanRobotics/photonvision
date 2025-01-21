@@ -41,6 +41,7 @@ public class LimelightAlignToTargetCommand extends Command {
         Joystick driver,
         boolean autonomousDriving
     ) {
+        super();
         addRequirements(driveTrain);
         this.driveTrain = driveTrain;
         this.llLockon = llLockon;
@@ -52,6 +53,7 @@ public class LimelightAlignToTargetCommand extends Command {
 
     @Override
     public void initialize() {
+        super.initialize();
         initPose = driveTrain.getPose();
         _timer.reset();
         _timer.start();
@@ -64,12 +66,13 @@ public class LimelightAlignToTargetCommand extends Command {
         thetaPID.inputRange = Constant.TwoPI;
 
         lastTime = 0;
-        llLockon.drive(driveTrain, 1);
+        llLockon.drive(driveTrain, 1D);
         robotCanDrive = true;
     }
 
     @Override
     public void execute() {
+        super.execute();
         LockonSubsystem.TagReading reading = llLockon.getReading();
         double time = _timer.get();
         double dt = time - lastTime;
@@ -106,12 +109,14 @@ public class LimelightAlignToTargetCommand extends Command {
 
     @Override
     public void end(boolean interrupted) {
+        super.end(interrupted);
         _timer.stop();
         driveTrain.brake();
     }
 
     @Override
     public boolean isFinished() {
+        super.isFinished();
         boolean retVal = false;
         if (isAuto) {
             // 2024... time checks on the shooter (see if 2s had elapsed)
