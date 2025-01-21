@@ -51,7 +51,7 @@ public class SparkFlexSwerveModule extends frc.lib.SwerveModule3673 {
         applyTurnConfiguration();
     }
 
-    private void resetTurnToAbsolute() {
+    public void resetTurnToAbsolute() {
         var absPos = absoluteEncoder.getAbsolutePosition().refresh();
         double absPosn = absPos.getValueAsDouble(); // rotations
         double absolutePosition = (absPosn * Constant.TwoPI) - absoluteEncoderOffset; // radians
@@ -65,7 +65,7 @@ public class SparkFlexSwerveModule extends frc.lib.SwerveModule3673 {
         turnMotor.set(turnPIDController.calculate(absolutePosition, 0));
     }
 
-    private void applyTurnConfiguration() {
+    public void applyTurnConfiguration() {
         REVLibError status;
         for (int i = 0; i < 5; i++) {
             status = turnMotor.configure(turnMotor.getConfig(), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
@@ -76,24 +76,5 @@ public class SparkFlexSwerveModule extends frc.lib.SwerveModule3673 {
                 SmartDashboard.putString(name + " Config Error", status.toString());
             }
         }
-    }
-
-    public SwerveModuleState getState() {
-        double velocity = Conversions.rpmToMps(driveMotor.getEncoder().getVelocity()); // rpm -> m/s
-        Rotation2d angle = Rotation2d.fromRotations(turnMotor.getEncoder().getPosition());
-        return new SwerveModuleState(velocity, angle);
-    }
-
-    public SwerveModulePosition getPosition() {
-        double position = driveMotor.getEncoder().getPosition() * DriveConstants.wheelCircumfrence;
-        Rotation2d angle = Rotation2d.fromRadians(-turnMotor.getEncoder().getPosition() * Constant.TwoPI);
-        return new SwerveModulePosition(position, angle);
-    }
-
-    public void setDesiredState(SwerveModuleState desiredState) {
-        desiredState = SwerveModuleState.optimize(desiredState, getState().angle);
-        
-        setSpeed(desiredState);
-        setAngle(desiredState);
     }
 }
