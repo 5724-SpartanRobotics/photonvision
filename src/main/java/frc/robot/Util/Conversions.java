@@ -1,17 +1,17 @@
 package frc.robot.Util;
 
+import edu.wpi.first.math.util.Units;
+import frc.robot.Subsystems.Constant;
 import frc.robot.Subsystems.Constant.DriveConstants;
 
 public class Conversions {
-    public static double twoPi = Math.PI * 2;
-
     /**
      * Converts falcon motor counts to radians - specific to the turn motor
      * @param counts The counts to be converted to radians
      * @return The radians for the specified counts.
      */
     public static double falconToRadians(double counts){
-        return counts * (twoPi / (DriveConstants.turnGearRatio * 1.0));
+        return counts * (Constant.TwoPI / (DriveConstants.turnGearRatio * 1.0));
     }
 
     /**
@@ -29,7 +29,7 @@ public class Conversions {
      * @return Falcon Counts - 1.0 = 1 rotation of the motor
      */
     public static double radiansToFalcon(double radians){
-        return radians / (twoPi / (DriveConstants.turnGearRatio * 1.0));
+        return radians / (Constant.TwoPI / (DriveConstants.turnGearRatio * 1.0));
     }
 
     public static double degreesToFalcon(double degrees){
@@ -65,6 +65,16 @@ public class Conversions {
     {
         double distanceMeters = positionCounts / 1.0 / DriveConstants.driveGearRatio * DriveConstants.wheelCircumfrence;
         return distanceMeters;
+    }
+
+    ///
+    /**
+     * Converts drive motor RPM to m/s.
+     * @param rpm
+     * @return
+     */
+    public static double rpmToMps(double rpm) {
+        return rpm * Constant.TwoPI * Units.inchesToMeters(DriveConstants.wheelDiameter) / 60;
     }
 
 }
