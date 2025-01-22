@@ -131,8 +131,8 @@ public class ApriltagLockon2Command extends Command {
             // perform checks to see if other subsystems have done what they need
             return true;
         } else if (
-            hid.getRawButton(ControllerConstants.ButtonMap.TagLockon) ||
-            hid.getRawButton(ControllerConstants.ButtonMap.TagLockonAlt)
+            !hid.getRawButton(ControllerConstants.ButtonMap.TagLockon) &&
+            !hid.getRawButton(ControllerConstants.ButtonMap.TagLockonAlt)
         ) {
             r = true;
             // turn off other things because they are done too.
