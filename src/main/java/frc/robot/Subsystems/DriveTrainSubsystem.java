@@ -136,6 +136,15 @@ public class DriveTrainSubsystem extends SubsystemBase {
         RB.setDesiredState(swerveModStates[3]);
     }
 
+    public void drive(SwerveModuleState[] swerveModStates) {
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModStates, DriveConstants.maxRobotSpeedmps);
+
+        LF.setDesiredState(swerveModStates[0]);
+        RF.setDesiredState(swerveModStates[1]);
+        LB.setDesiredState(swerveModStates[2]);
+        RB.setDesiredState(swerveModStates[3]);
+    }
+
     public void drive(Translation2d translation, double rotation) {
         _drive(translation, rotation);
     }
