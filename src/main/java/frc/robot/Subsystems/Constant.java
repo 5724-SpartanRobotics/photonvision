@@ -216,4 +216,13 @@ public class Constant {
 
         public static final String kLimelightName = "Gamepiecedetection";
     }
+
+    public static final class CameraConstants {
+        public static final class MicrosoftLifeCamHD3000 {
+            public static final int Width_px = 640;
+            public static final int Height_px = 480;
+            public static final int vFOV = 60;
+            public static final int hFOV = 120;
+        }
+    }
 }

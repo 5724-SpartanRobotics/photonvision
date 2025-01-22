@@ -77,4 +77,11 @@ public class Conversions {
         return rpm * Constant.TwoPI * Units.inchesToMeters(DriveConstants.wheelDiameter) / 60;
     }
 
+    public static Integer[] intArrayToIntegerArray(int[] intArray) {
+        Integer[] iArray = new Integer[intArray.length];
+        for (int i = 0; i < intArray.length; i++) {
+            iArray[i] = intArray[i];
+        }
+        return iArray;
+    }
 }
