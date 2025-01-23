@@ -44,6 +44,7 @@ public class ApriltagLockon2Subsystem extends SubsystemBase {
     }
 
     private double getDistance() {
+        if (bestTarget == null) { return 0; }
         List<TargetCorner> points = bestTarget.getDetectedCorners();
         double topavg = (points.get(3).y + points.get(2).y) / 2;
         double btmavg = (points.get(0).y + points.get(1).y) / 2;
@@ -55,14 +56,16 @@ public class ApriltagLockon2Subsystem extends SubsystemBase {
     }
 
     private double getDegrees() {
+        if (bestTarget == null) { return 0; }
         List<TargetCorner> points = bestTarget.getDetectedCorners();
         double xavg = ( points.get(0).x + points.get(1).x + points.get(2).x  + points.get(3).x ) / 4;
         return ( xavg / Constant.CameraConstants.MicrosoftLifeCamHD3000.Width_px ) * Constant.CameraConstants.MicrosoftLifeCamHD3000.hFOV - 
             Constant.CameraConstants.MicrosoftLifeCamHD3000.vFOV;
     }
 
-    private int getFiducialId() {
+    public int getFiducialId() {
         var res = vision.getBestResult();
+        // System.out.println("THis should NOT be nulll! is?" + String.valueOf(res == null));
         return res == null ? -1 : res.getFiducialId();
     }
 
@@ -76,7 +79,8 @@ public class ApriltagLockon2Subsystem extends SubsystemBase {
             double dD = Units.feetToMeters(di - targetDistance + AutoConstants.cameraDepthOffset);
             double dX = -dD * Math.sin(Math.toRadians(theta));
             double dY = dD * Math.cos(Math.toRadians(theta));
-            SmartDashboard.putNumberArray("AprilTagTargetXY", new Double[]{dX, dY});
+            SmartDashboard.putNumber("AprilTagTargetXY X", dX);
+            SmartDashboard.putNumber("AprilTagTargetXY Y", dY);
             Translation2d t2d = new Translation2d(-dY, dX);
             Pose2d p2d = new Pose2d(t2d, drive.getGyroHeading().times(-1));
             drive.ZeroDriveSensors(p2d);

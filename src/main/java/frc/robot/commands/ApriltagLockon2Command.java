@@ -37,6 +37,7 @@ public class ApriltagLockon2Command extends Command {
         this.targetPose = new Pose2d(new Translation2d(), new Rotation2d());
         this.targetDistance = targetDist;
         this.autonomous = false;
+        constructor();
     }
 
     public ApriltagLockon2Command(DriveTrainSubsystem d, ApriltagLockon2Subsystem a, Joystick j, int[] tagsAllowed, Pose2d p, double targetDist) {
@@ -48,6 +49,7 @@ public class ApriltagLockon2Command extends Command {
         this.targetPose = p;
         this.targetDistance = targetDist;
         this.autonomous = false;
+        constructor();
     }
 
     public ApriltagLockon2Command(DriveTrainSubsystem d, ApriltagLockon2Subsystem a, Joystick j, int[] tagsAllowed, Pose2d p, double targetDist, boolean autonomous) {
@@ -59,12 +61,10 @@ public class ApriltagLockon2Command extends Command {
         this.targetPose = p;
         this.targetDistance = targetDist;
         this.autonomous = autonomous;
+        constructor();
     }
 
-    @Override
-    public void initialize() {
-        super.initialize();
-        // Pose2d initPose = drive.getPose();
+    private void constructor() {
         timer.reset(); timer.start();
 
         xPid = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
@@ -76,6 +76,12 @@ public class ApriltagLockon2Command extends Command {
         lastTime = 0;
         lockonSubsystem.setDrivePosition(targetDistance, tagSubset);
         robotCanDrive = true;
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        // Pose2d initPose = drive.getPose();
     }
 
     @Override
@@ -102,7 +108,10 @@ public class ApriltagLockon2Command extends Command {
         if(omega > omegacap) omega = omegacap;
         else if(omega < -omegacap) omega = -omegacap;
 
-        SmartDashboard.putNumberArray("AprilTagLockonCmdXYW", new Double[]{vx, vy, omega});
+        SmartDashboard.putNumber("AprilTagLockonCmd X", vx);
+        SmartDashboard.putNumber("AprilTagLockonCmd Y", vy);
+        SmartDashboard.putNumber("AprilTagLockonCmd Omega", omega);
+        SmartDashboard.putNumber("AprilTagLockonCmd Id", lockonSubsystem.getFiducialId());
 
         lastTime = time;
         if(
@@ -112,9 +121,9 @@ public class ApriltagLockon2Command extends Command {
             robotCanDrive = false;
         }
 
-        if (robotCanDrive) {
+        // if (robotCanDrive) {
             drive.drive(new Translation2d(vx, vy), omega);
-        } else drive.drive();
+        // } else drive.drive();
     }
 
     @Override

@@ -15,16 +15,23 @@ public class PhotonVisionSubsystem extends SubsystemBase {
     }
 
     public PhotonTrackedTarget getBestResult() {
-        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-        if (!results.isEmpty()) {
-            var latestResult = results.get(results.size() - 1);
+        // List<PhotonPipelineResult> results = camera.getAllUnreadResults();'
+        PhotonPipelineResult results = camera.getLatestResult();
+        if (results != null) {
+            // var latestResult = results.get(results.size() - 1);
     
-            if (latestResult.hasTargets()) {
-                return latestResult.getTargets().stream()
-                        .max((a, b) -> Double.compare(a.getPoseAmbiguity(), b.getPoseAmbiguity()))
-                        .orElse(null);
+            // if (latestResult.hasTargets()) {
+            //     PhotonTrackedTarget tt = latestResult.getTargets().stream()
+            //         .max((a, b) -> Double.compare(a.getPoseAmbiguity(), b.getPoseAmbiguity())).orElse(null);
+            //     SmartDashboard.putNumber("PhotonBestTargetYaw", tt.getYaw());
+            //     SmartDashboard.putNumber("PhotonBestTargetArea", tt.getArea());
+            //     return tt;
+            // }
+            try {
+                return results.getBestTarget();
+            } catch (IndexOutOfBoundsException e) {
+                return null;
             }
-            return null;
         }
         return null;
     }

@@ -10,6 +10,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.urcl.URCL;
 
+import com.fasterxml.jackson.core.json.PackageVersion;
+
 import choreo.Choreo;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
@@ -36,13 +38,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.QFRCLib.ErrorLevel;
+import frc.robot.Subsystems.ApriltagLockon2Subsystem;
 import frc.robot.Subsystems.ApriltagLockonSubsystem;
 import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.LimelightLockonSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
+import frc.robot.Subsystems.VisionSubsystem2024;
+import frc.robot.Subsystems.VisionSubsystem2024;
 import frc.robot.Subsystems.Constant.ControllerConstants;
 import frc.robot.Subsystems.Constant.DriveConstants;
 import frc.robot.commands.ApriltagAlignToTargetCommand;
+import frc.robot.commands.ApriltagLockon2Command;
+import frc.robot.commands.GotToAPlace2024;
 import frc.robot.commands.LimelightAlignToTargetCommand;
 import frc.robot.commands.TeleopSwerve;
 
@@ -56,7 +63,9 @@ public class Robot extends LoggedRobot {
     private Timer timer = new Timer();
 
     private ApriltagLockonSubsystem apriltagLockon;
+    private ApriltagLockon2Subsystem apriltagLockon2;
     private LimelightLockonSubsystem limelightLockon;
+    private VisionSubsystem2024 visision;
     private Command setPos;
 
     // Choreo trajectory support
@@ -92,7 +101,9 @@ public class Robot extends LoggedRobot {
         drive = new DriveTrainSubsystem();
         vision = new PhotonVisionSubsystem("Front");
         apriltagLockon = new ApriltagLockonSubsystem(drive, vision, drivestick);
+        apriltagLockon2 = new ApriltagLockon2Subsystem(drive, vision);
         limelightLockon = new LimelightLockonSubsystem(drive);
+        visision = new VisionSubsystem2024(drive);
         powerDistribution = new PowerDistribution(0, ModuleType.kCTRE);
         PortForwarder.add(5800, "photonvision.local", 5800);
         PortForwarder.add(5801, "limelight.local", 5801);
@@ -147,7 +158,11 @@ public class Robot extends LoggedRobot {
     public void teleopPeriodic() {
         if (drivestick.getRawButton(ControllerConstants.ButtonMap.TagLockon) || drivestick.getRawButton(ControllerConstants.ButtonMap.TagLockonAlt)) {
             Pose2d targetPose = new Pose2d(new Translation2d(), new Rotation2d());
-            setPos = new ApriltagAlignToTargetCommand(drive, apriltagLockon, targetPose, 3 /* DriveConstants.speakerDistance */, drivestick, false);
+            // setPos = new ApriltagAlignToTargetCommand(drive, apriltagLockon, targetPose, 3 /* DriveConstants.speakerDistance */, drivestick, false);
+            // setPos.execute();
+            // setPos = new ApriltagLockon2Command(drive, apriltagLockon2, drivestick, new int[] {1}, 3);
+            // setPos.execute();
+            setPos = new GotToAPlace2024(drive, visision, targetPose, 3, drivestick, isAutonomous());
             setPos.execute();
         }
 
