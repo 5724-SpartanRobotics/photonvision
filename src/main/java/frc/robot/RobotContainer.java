@@ -2,11 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Subsystems.Constant;
@@ -24,7 +19,6 @@ public class RobotContainer {
     private final VisionSubsystem2024 vision;
     private final LimelightLockonSubsystem limelightLockon;
     private final Joystick drivestick;
-    private final Timer timer;
 
     private JoystickButton jb_ZeroGyro;
     private JoystickButton jb_AlignApriltag;
@@ -36,10 +30,9 @@ public class RobotContainer {
         this.vision = new VisionSubsystem2024(drive);
         this.limelightLockon = new LimelightLockonSubsystem(drive);
         this.drivestick = new Joystick(0);
-        this.timer = new Timer();
 
         this.jb_ZeroGyro = new JoystickButton(drivestick, Constant.ControllerConstants.ButtonMap.GyroZero);
-        this.jb_AlignApriltag = new JoystickButton(drivestick, Constant.ControllerConstants.ButtonMap.TagLockon);
+        this.jb_AlignApriltag = new JoystickButton(drivestick, Constant.ControllerConstants.ButtonMap.TagLockonAlt);
         this.jb_AlignLimelighObject = new JoystickButton(drivestick, Constant.ControllerConstants.ButtonMap.ObjectLockon);
 
         configureButtonBindings();

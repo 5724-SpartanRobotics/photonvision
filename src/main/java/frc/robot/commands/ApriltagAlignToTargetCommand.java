@@ -1,23 +1,16 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Subsystems.DriveTrainSubsystem;
-import frc.robot.Subsystems.PhotonVisionSubsystem;
-import frc.robot.Subsystems.Constant.AutoConstants;
-
-import org.photonvision.targeting.PhotonTrackedTarget;
-
 import frc.robot.Subsystems.ApriltagLockonSubsystem;
 import frc.robot.Subsystems.Constant;
+import frc.robot.Subsystems.Constant.AutoConstants;
 import frc.robot.Subsystems.Constant.HelixPIDController;
 import frc.robot.Subsystems.Constant.LockonSubsystem;
-
-import java.util.List;
+import frc.robot.Subsystems.DriveTrainSubsystem;
 
 public class ApriltagAlignToTargetCommand extends Command {
     private DriveTrainSubsystem driveTrain;

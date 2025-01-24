@@ -1,12 +1,7 @@
 package frc.robot;
 
-import java.util.Optional;
-
 import org.littletonrobotics.junction.LoggedRobot;
 
-import choreo.Choreo;
-import choreo.trajectory.SwerveSample;
-import choreo.trajectory.Trajectory;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;

@@ -1,20 +1,10 @@
 package frc.robot.Subsystems;
 
-import java.net.ProtocolException;
-import java.util.HashMap;
-
-import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import edu.wpi.first.hal.simulation.AnalogInDataJNI;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Subsystems.Constant.AutoConstants;
 import frc.robot.Subsystems.Constant.LockonSubsystem;
 
 public class ApriltagLockonSubsystem extends LockonSubsystem {
