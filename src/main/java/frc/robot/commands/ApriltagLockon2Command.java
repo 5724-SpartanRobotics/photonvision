@@ -35,7 +35,7 @@ public class ApriltagLockon2Command extends Command {
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = new Pose2d(new Translation2d(), new Rotation2d());
-        this.targetDistance = targetDist;
+        this.targetDistance = targetDist / 2;
         this.autonomous = false;
         constructor();
     }
@@ -47,7 +47,7 @@ public class ApriltagLockon2Command extends Command {
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = p;
-        this.targetDistance = targetDist;
+        this.targetDistance = targetDist / 2;
         this.autonomous = false;
         constructor();
     }
@@ -59,7 +59,7 @@ public class ApriltagLockon2Command extends Command {
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = p;
-        this.targetDistance = targetDist;
+        this.targetDistance = targetDist / 2;
         this.autonomous = autonomous;
         constructor();
     }
@@ -67,9 +67,9 @@ public class ApriltagLockon2Command extends Command {
     private void constructor() {
         timer.reset(); timer.start();
 
-        xPid = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
-        yPid = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
-        tPid = new HelixPIDController(AutoConstants.kPTurnAutoShoot, 0, 0);
+        xPid = new HelixPIDController(.5, .1, 0);
+        yPid = new HelixPIDController(.5, .1, 0);
+        tPid = new HelixPIDController(.25, .15, 0);
         tPid.setContinuous(true);
         tPid.setRange(Constant.TwoPI);
 

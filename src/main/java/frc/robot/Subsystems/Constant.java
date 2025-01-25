@@ -184,6 +184,7 @@ public class Constant {
             public static final int ObjectLockon = 2;
             public static final int ObjectLockonAlt = 12;
             public static final int OuttakePiece = -1;
+            public static final int Rotate180 = 8;
         }
     }
     public static final class DebugSetting{
@@ -215,8 +216,8 @@ public class Constant {
 
     public static final class CameraConstants {
         public static final class MicrosoftLifeCamHD3000 {
-            public static final int Width_px = 640;
-            public static final int Height_px = 480;
+            public static final int Width_px = 640 / 2;
+            public static final int Height_px = 480 / 2;
             public static final int vFOV = 60;
             public static final int hFOV = 120;
         }
