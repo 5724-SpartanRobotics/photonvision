@@ -28,7 +28,8 @@ public class ApriltagLockon2Command extends Command {
     private double lastTime = 0;
     private boolean robotCanDrive;
 
-    private final double distanceFix = 18/3;
+    private final double distanceFixMulti = 4/3;
+    private final double distanceFixAdd = 2;
 
     public ApriltagLockon2Command(DriveTrainSubsystem d, ApriltagLockon2Subsystem a, Joystick j, int[] tagsAllowed, double targetDist) {
         super();
@@ -37,7 +38,7 @@ public class ApriltagLockon2Command extends Command {
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = new Pose2d(new Translation2d(), new Rotation2d());
-        this.targetDistance = targetDist * distanceFix;
+        this.targetDistance = targetDist * distanceFixMulti + distanceFixAdd;
         this.autonomous = false;
         constructor();
     }
@@ -49,7 +50,7 @@ public class ApriltagLockon2Command extends Command {
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = p;
-        this.targetDistance = targetDist * distanceFix;
+        this.targetDistance = targetDist * distanceFixMulti + distanceFixAdd;
         this.autonomous = false;
         constructor();
     }
@@ -61,7 +62,7 @@ public class ApriltagLockon2Command extends Command {
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = p;
-        this.targetDistance = targetDist * distanceFix;
+        this.targetDistance = targetDist * distanceFixMulti + distanceFixAdd;
         this.autonomous = autonomous;
         constructor();
     }
@@ -129,7 +130,7 @@ public class ApriltagLockon2Command extends Command {
 
         lastTime = time;
         if(
-            Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) < 1 &&
+            Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) > 1 &&
             Math.abs(lockonSubsystem.getTheta(-1) - drive.getGyroHeading().getDegrees()) < 3
         ) {
             robotCanDrive = false;

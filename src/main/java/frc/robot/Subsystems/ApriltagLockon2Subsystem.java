@@ -72,10 +72,14 @@ public class ApriltagLockon2Subsystem extends SubsystemBase {
         int f = getFiducialId();
         double di = getDistance();
         double de = getDegrees();
+
+        SmartDashboard.putNumber("ApriltagCmd Dist", di);
+        SmartDashboard.putNumber("ApriltagCmd Deg", de);
+
         ArrayList<Integer> l = new ArrayList<>(Arrays.asList(tagId));
         if (l.contains(f)) {
-            double theta = -de + drive.getGyroHeading().getDegrees() - AutoConstants.cameraAngleOffset;
-            double dD = Units.feetToMeters(di - targetDistance + AutoConstants.cameraDepthOffset);
+            double theta = -de + drive.getGyroHeading().getDegrees();
+            double dD = Units.feetToMeters(di - targetDistance);
             double dX = -dD * Math.sin(Math.toRadians(theta));
             double dY = dD * Math.cos(Math.toRadians(theta));
             SmartDashboard.putNumber("AprilTagTargetXY X", dX);
