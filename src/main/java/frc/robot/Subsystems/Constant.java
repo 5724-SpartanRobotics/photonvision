@@ -28,6 +28,11 @@ public class Constant {
             continuous = false;
         }
 
+        public double setP(double P) {
+            kP = P;
+            return kP;
+        }
+
         public double calculate(double state, double dt) {
             double error = (reference - state) % inputRange;
             if (Math.abs(error) > inputRange / 2) {

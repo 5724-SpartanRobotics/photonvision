@@ -28,6 +28,8 @@ public class ApriltagLockon2Command extends Command {
     private double lastTime = 0;
     private boolean robotCanDrive;
 
+    private final double distanceFix = 18/3;
+
     public ApriltagLockon2Command(DriveTrainSubsystem d, ApriltagLockon2Subsystem a, Joystick j, int[] tagsAllowed, double targetDist) {
         super();
         this.drive = d;
@@ -35,7 +37,7 @@ public class ApriltagLockon2Command extends Command {
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = new Pose2d(new Translation2d(), new Rotation2d());
-        this.targetDistance = targetDist / 2;
+        this.targetDistance = targetDist * distanceFix;
         this.autonomous = false;
         constructor();
     }
@@ -47,7 +49,7 @@ public class ApriltagLockon2Command extends Command {
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = p;
-        this.targetDistance = targetDist / 2;
+        this.targetDistance = targetDist * distanceFix;
         this.autonomous = false;
         constructor();
     }
@@ -59,7 +61,7 @@ public class ApriltagLockon2Command extends Command {
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = p;
-        this.targetDistance = targetDist / 2;
+        this.targetDistance = targetDist * distanceFix;
         this.autonomous = autonomous;
         constructor();
     }
@@ -67,9 +69,13 @@ public class ApriltagLockon2Command extends Command {
     private void constructor() {
         timer.reset(); timer.start();
 
-        xPid = new HelixPIDController(.5, .1, 0);
-        yPid = new HelixPIDController(.5, .1, 0);
-        tPid = new HelixPIDController(.25, .15, 0);
+        // SmartDashboard.putNumber("ApriltagLockonXP", 6);
+        // SmartDashboard.putNumber("ApriltagLockonTP", 6);
+        // SmartDashboard.putNumber("ApriltagLockonTP", 3);
+
+        xPid = new HelixPIDController(1, 0, 0);
+        yPid = new HelixPIDController(1, 0, 0);
+        tPid = new HelixPIDController(.5, .001, 0);
         tPid.setContinuous(true);
         tPid.setRange(Constant.TwoPI);
 
@@ -87,6 +93,11 @@ public class ApriltagLockon2Command extends Command {
     @Override
     public void execute() {
         super.execute();
+
+        // xPid.setP(SmartDashboard.getNumber("ApriltagLockonXP", 6));
+        // yPid.setP(SmartDashboard.getNumber("ApriltagLockonYP", 6));
+        // tPid.setP(SmartDashboard.getNumber("ApriltagLockonTP", 3));
+
         double time = timer.get();
         double dt = time - lastTime;
         Pose2d currPose = drive.getPose();
@@ -108,6 +119,9 @@ public class ApriltagLockon2Command extends Command {
         if(omega > omegacap) omega = omegacap;
         else if(omega < -omegacap) omega = -omegacap;
 
+        SmartDashboard.putNumber("ApriltagLockonCmd Omgea", omega);
+        SmartDashboard.putNumber("ApriltagLockonCmd OmgeaCap", omegacap);
+
         SmartDashboard.putNumber("AprilTagLockonCmd X", vx);
         SmartDashboard.putNumber("AprilTagLockonCmd Y", vy);
         SmartDashboard.putNumber("AprilTagLockonCmd Omega", omega);
@@ -115,15 +129,15 @@ public class ApriltagLockon2Command extends Command {
 
         lastTime = time;
         if(
-            Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) < AutoConstants.autoShootCloseness &&
-            Math.abs(lockonSubsystem.getTheta(-1) - drive.getGyroHeading().getDegrees()) < AutoConstants.degreesError
+            Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) < 1 &&
+            Math.abs(lockonSubsystem.getTheta(-1) - drive.getGyroHeading().getDegrees()) < 3
         ) {
             robotCanDrive = false;
         }
 
-        // if (robotCanDrive) {
+        if (robotCanDrive) {
             drive.drive(new Translation2d(vx, vy), omega);
-        // } else drive.drive();
+        } else drive.drive();
     }
 
     @Override

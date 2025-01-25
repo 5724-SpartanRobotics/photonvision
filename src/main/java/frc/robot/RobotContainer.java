@@ -54,7 +54,7 @@ public class RobotContainer {
     private void configureButtonBindings() {
         jb_AlignApriltag.whileTrue(
             // new GotToAPlace2024(drive, vision, new Pose2d(), 3, drivestick, false)
-            new ApriltagLockon2Command(drive, vision, drivestick, new int[] {1}, 3)
+            new ApriltagLockon2Command(drive, vision, drivestick, new int[] {1}, 1)
             // new ApriltagAlignToTargetCommand(drive, vision, new Pose2d(), 3, drivestick, false)
         );
         jb_AlignLimelighObject.whileTrue(
