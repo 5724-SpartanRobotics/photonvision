@@ -54,11 +54,11 @@ public class RobotContainer {
     private void configureButtonBindings() {
         jb_AlignApriltag.whileTrue(
             // new GotToAPlace2024(drive, vision, new Pose2d(), 3, drivestick, false)
-            new ApriltagLockon2Command(drive, vision, drivestick, new int[] {1}, 1)
+            new ApriltagLockon2Command(drive, vision, drivestick, new int[] {1}, 3)
             // new ApriltagAlignToTargetCommand(drive, vision, new Pose2d(), 1, drivestick, false)
         );
         jb_AlignLimelighObject.whileTrue(
-            new LimelightAlignToTargetCommand(drive, limelightLockon, new Pose2d(), 3, drivestick, false)
+            new LimelightAlignToTargetCommand(drive, limelightLockon, drivestick, 1, false)
         );
         jb_ZeroGyro.onTrue(new InstantCommand(() -> {drive.setGyroZero();}));
         jb_Rotate180.onTrue(new InstantCommand(() -> {drive.drive(-Math.PI);}));

@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems.ApriltagLockon2Subsystem;
 import frc.robot.Subsystems.Constant;
-import frc.robot.Subsystems.Constant.AutoConstants;
 import frc.robot.Subsystems.Constant.ControllerConstants;
 import frc.robot.Subsystems.Constant.HelixPIDController;
 import frc.robot.Subsystems.DriveTrainSubsystem;
@@ -31,38 +30,59 @@ public class ApriltagLockon2Command extends Command {
     private final double distanceFixMulti = 4/3;
     private final double distanceFixAdd = 2;
 
-    public ApriltagLockon2Command(DriveTrainSubsystem d, ApriltagLockon2Subsystem a, Joystick j, int[] tagsAllowed, double targetDist) {
+    public ApriltagLockon2Command(
+        DriveTrainSubsystem d,
+        ApriltagLockon2Subsystem a,
+        Joystick j,
+        int[] tagsAllowed,
+        double targetDistFt
+    ) {
         super();
         this.drive = d;
         this.lockonSubsystem = a;
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = new Pose2d(new Translation2d(), new Rotation2d());
-        this.targetDistance = targetDist * distanceFixMulti + distanceFixAdd;
+        this.targetDistance = targetDistFt * distanceFixMulti + distanceFixAdd;
         this.autonomous = false;
         constructor();
     }
 
-    public ApriltagLockon2Command(DriveTrainSubsystem d, ApriltagLockon2Subsystem a, Joystick j, int[] tagsAllowed, Pose2d p, double targetDist) {
+    public ApriltagLockon2Command(
+        DriveTrainSubsystem d,
+        ApriltagLockon2Subsystem a,
+        Joystick j,
+        int[] tagsAllowed,
+        Pose2d p,
+        double targetDistFt
+    ) {
         super();
         this.drive = d;
         this.lockonSubsystem = a;
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = p;
-        this.targetDistance = targetDist * distanceFixMulti + distanceFixAdd;
+        this.targetDistance = targetDistFt * distanceFixMulti + distanceFixAdd;
         this.autonomous = false;
         constructor();
     }
 
-    public ApriltagLockon2Command(DriveTrainSubsystem d, ApriltagLockon2Subsystem a, Joystick j, int[] tagsAllowed, Pose2d p, double targetDist, boolean autonomous) {
+    public ApriltagLockon2Command(
+        DriveTrainSubsystem d,
+        ApriltagLockon2Subsystem a,
+        Joystick j,
+        int[] tagsAllowed,
+        Pose2d p,
+        double targetDistFt,
+        boolean autonomous
+    ) {
         super();
         this.drive = d;
         this.lockonSubsystem = a;
         this.hid = j;
         this.tagSubset = tagsAllowed;
         this.targetPose = p;
-        this.targetDistance = targetDist * distanceFixMulti + distanceFixAdd;
+        this.targetDistance = targetDistFt * distanceFixMulti + distanceFixAdd;
         this.autonomous = autonomous;
         constructor();
     }
@@ -85,11 +105,11 @@ public class ApriltagLockon2Command extends Command {
         robotCanDrive = true;
     }
 
-    @Override
-    public void initialize() {
-        super.initialize();
-        // Pose2d initPose = drive.getPose();
-    }
+    // @Override
+    // public void initialize() {
+    //     super.initialize();
+    //     // Pose2d initPose = drive.getPose();
+    // }
 
     @Override
     public void execute() {
@@ -130,7 +150,7 @@ public class ApriltagLockon2Command extends Command {
 
         lastTime = time;
         if(
-            Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) > 1 &&
+            Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) < 1 &&
             Math.abs(lockonSubsystem.getTheta(-1) - drive.getGyroHeading().getDegrees()) < 3
         ) {
             robotCanDrive = false;

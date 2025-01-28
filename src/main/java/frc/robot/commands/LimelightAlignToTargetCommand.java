@@ -1,10 +1,13 @@
 package frc.robot.commands;
 
+import java.lang.reflect.Constructor;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems.Constant;
 import frc.robot.Subsystems.Constant.AutoConstants;
@@ -18,7 +21,7 @@ public class LimelightAlignToTargetCommand extends Command {
     private LimelightLockonSubsystem llLockon;
     private Pose2d targetPose;
     private double targetDistance;
-    private Joystick driver;
+    private Joystick hid;
     private boolean autoDrive;
 
     private Pose2d initPose;
@@ -34,32 +37,47 @@ public class LimelightAlignToTargetCommand extends Command {
         LimelightLockonSubsystem llLockon,
         Pose2d targetPose,
         double distance, 
-        Joystick driver,
+        Joystick hid,
         boolean autonomousDriving
     ) {
         super();
-        addRequirements(driveTrain);
+        addRequirements(driveTrain, llLockon);
         this.driveTrain = driveTrain;
         this.llLockon = llLockon;
         this.targetPose = targetPose;
         this.targetDistance = distance;
-        this.driver = driver;
+        this.hid = hid;
         this.autoDrive = autonomousDriving;
+        constructor();
     }
 
-    @Override
-    public void initialize() {
-        super.initialize();
+    public LimelightAlignToTargetCommand(
+        DriveTrainSubsystem driveTrain,
+        LimelightLockonSubsystem llLockon,
+        Joystick driver,
+        double distance,
+        boolean autonomousDriving
+    ) {
+        super();
+        addRequirements(driveTrain, llLockon);
+        this.driveTrain = driveTrain;
+        this.llLockon = llLockon;
+        this.targetPose = new Pose2d();
+        this.targetDistance = distance;
+        this.autoDrive = autonomousDriving;
+        constructor();
+    }
+
+    private void constructor() {
         initPose = driveTrain.getPose();
         _timer.reset();
         _timer.start();
 
-        xPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
-        yPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
-
-        thetaPID = new HelixPIDController(AutoConstants.kPAutoShoot, 0, 0);
-        thetaPID.continuous = true;
-        thetaPID.inputRange = Constant.TwoPI;
+        xPID = new HelixPIDController(1, 0, 0);
+        yPID = new HelixPIDController(1, 0, 0);
+        thetaPID = new HelixPIDController(0.5, 0, 0);
+        thetaPID.setContinuous(true);
+        thetaPID.setRange(Constant.TwoPI);
 
         lastTime = 0;
         llLockon.drive(driveTrain, 1D);
@@ -69,13 +87,13 @@ public class LimelightAlignToTargetCommand extends Command {
     @Override
     public void execute() {
         super.execute();
-        LockonSubsystem.TagReading reading = llLockon.getReading();
+        Pose2d reading = llLockon.getT();
         double time = _timer.get();
         double dt = time - lastTime;
         Pose2d currPose = driveTrain.getPose();
-        xPID.reference = -targetPose.getX();
-        yPID.reference = -targetPose.getY();
-        thetaPID.reference = Units.degreesToRadians(reading.angle);
+        xPID.setReference(-targetPose.getX());
+        yPID.setReference(-targetPose.getY());
+        thetaPID.setReference(Units.degreesToRadians(reading.getX()));
 
         double vx = xPID.calculate(currPose.getX(), dt);
         double vy = yPID.calculate(currPose.getY(), dt);
@@ -90,16 +108,34 @@ public class LimelightAlignToTargetCommand extends Command {
         if(omega > omegacap) omega = omegacap;
         else if(omega < -omegacap) omega = -omegacap;
 
+        SmartDashboard.putNumber("LimelightLockonCmd Omgea", omega);
+        SmartDashboard.putNumber("LimelightLockonCmd OmgeaCap", omegacap);
+
+        SmartDashboard.putNumber("LimelightLockonCmd X", vx);
+        SmartDashboard.putNumber("LimelightLockonCmd Y", vy);
+        SmartDashboard.putNumber("LimelightLockonCmd Omega", omega);
+
         lastTime = time;
-        if (
-            Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) < AutoConstants.autoShootCloseness &&
-            Math.abs(reading.angle - driveTrain.getGyroHeading().getDegrees()) < AutoConstants.degreesError
-        ) {
-            // Intake, do another thing, etc.
-            robotCanDrive = false;
+        // if (
+        //     // Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) < 1 &&
+        //     // Math.abs(reading.getX() /* - driveTrain.getGyroHeading().getDegrees() */) < 10 &&
+        //     reading.getY() <= -16
+        // ) {
+        //     // Intake, do another thing, etc.
+        //     robotCanDrive = false;
+        // }
+
+        if (reading.getY() <= -11.5) robotCanDrive = true;
+
+        SmartDashboard.putNumber("LimelightLockonCmd Count", llLockon.getTargetCount());
+        // if (reading.getX() == 0F && reading.getY() == 0F) robotCanDrive = false;
+
+        if (Math.abs(reading.getX()) < 24) {
+            vx *= Constant.signum(reading.getX());
+            // vy *= Constant.signum(reading.getX());
         }
 
-        if (robotCanDrive) driveTrain.drive(new Translation2d(vx, vy), omega);
+        if (robotCanDrive) driveTrain.drive(new Translation2d(vx, vy), -reading.getX());
         else driveTrain.drive();
     }
 
@@ -117,7 +153,10 @@ public class LimelightAlignToTargetCommand extends Command {
         if (isAuto) {
             // 2024... time checks on the shooter (see if 2s had elapsed)
             return true;
-        } else if (!driver.getRawButton(Constant.ControllerConstants.ButtonMap.OuttakePiece)) {
+        } else if (llLockon.getT().getY() < -16) {
+            // This is when the piece is about 1ft from the bumper with 
+            return true;
+        } else if (hid != null && !hid.getRawButton(Constant.ControllerConstants.ButtonMap.OuttakePiece)) {
             retVal = true;
             // 2024... turn off the shooter.
         }

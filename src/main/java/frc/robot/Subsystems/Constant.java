@@ -10,6 +10,9 @@ public class Constant {
     public static final double TwoPI = Math.PI * 2;
     public static final double HalfPI = Math.PI / 2;
 
+    public static int signum(double x) { return x >= 0 ? 1 : -1; }
+    public static int signum(int x) { return x >= 0 ? 1 : -1; }
+
     public static class HelixPIDController {
         public double kP;
         public double kD;
