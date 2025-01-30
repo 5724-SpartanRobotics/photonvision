@@ -45,7 +45,7 @@ public class LimelightLockonSubsystem extends LockonSubsystem {
         return new Pose2d(
             LimelightHelpers.getTX(Constant.AutoConstants.kLimelightName),
             LimelightHelpers.getTY(Constant.AutoConstants.kLimelightName),
-            new Rotation2d()
+            new Rotation2d(LimelightHelpers.getTA(Constant.AutoConstants.kLimelightName))
         );
     }
 

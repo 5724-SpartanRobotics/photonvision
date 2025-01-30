@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import java.lang.reflect.Constructor;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -10,9 +8,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Subsystems.Constant;
-import frc.robot.Subsystems.Constant.AutoConstants;
 import frc.robot.Subsystems.Constant.HelixPIDController;
-import frc.robot.Subsystems.Constant.LockonSubsystem;
 import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.LimelightLockonSubsystem;
 
@@ -24,12 +20,12 @@ public class LimelightAlignToTargetCommand extends Command {
     private Joystick hid;
     private boolean autoDrive;
 
-    private Pose2d initPose;
+    // private Pose2d initPose;
     private Timer _timer = new Timer();
     private HelixPIDController xPID, yPID, thetaPID;
     private double lastTime = 0;
     private boolean robotCanDrive;
-    private boolean isAuto;
+    // private boolean isAuto;
 
     // TODO: Find out the units of distance (meters/ft/etc)
     public LimelightAlignToTargetCommand(
@@ -69,7 +65,7 @@ public class LimelightAlignToTargetCommand extends Command {
     }
 
     private void constructor() {
-        initPose = driveTrain.getPose();
+        // initPose = driveTrain.getPose();
         _timer.reset();
         _timer.start();
 
@@ -91,12 +87,12 @@ public class LimelightAlignToTargetCommand extends Command {
         double time = _timer.get();
         double dt = time - lastTime;
         Pose2d currPose = driveTrain.getPose();
-        xPID.setReference(-targetPose.getX());
-        yPID.setReference(-targetPose.getY());
-        thetaPID.setReference(Units.degreesToRadians(reading.getX()));
+        xPID.setReference(-currPose.getX());
+        yPID.setReference(-currPose.getY());
+        thetaPID.setReference(currPose.getRotation().getRadians());
 
-        double vx = xPID.calculate(currPose.getX(), dt);
-        double vy = yPID.calculate(currPose.getY(), dt);
+        double vx = xPID.calculate(targetPose.getX(), dt);
+        double vy = yPID.calculate(targetPose.getY(), dt);
         double omega = -thetaPID.calculate(driveTrain.getGyroHeading().getRadians(), dt);
 
         double cap = 1.5;
@@ -108,13 +104,6 @@ public class LimelightAlignToTargetCommand extends Command {
         if(omega > omegacap) omega = omegacap;
         else if(omega < -omegacap) omega = -omegacap;
 
-        SmartDashboard.putNumber("LimelightLockonCmd Omgea", omega);
-        SmartDashboard.putNumber("LimelightLockonCmd OmgeaCap", omegacap);
-
-        SmartDashboard.putNumber("LimelightLockonCmd X", vx);
-        SmartDashboard.putNumber("LimelightLockonCmd Y", vy);
-        SmartDashboard.putNumber("LimelightLockonCmd Omega", omega);
-
         lastTime = time;
         // if (
         //     // Math.pow(currPose.getX(), 2) + Math.pow(currPose.getY(), 2) < 1 &&
@@ -125,15 +114,26 @@ public class LimelightAlignToTargetCommand extends Command {
         //     robotCanDrive = false;
         // }
 
-        if (reading.getY() <= -11.5) robotCanDrive = true;
+        if (Constant.isClose(reading.getY(), -12F, 3F)) robotCanDrive = false;
+        if (Constant.isClose(reading.getRotation().getRadians(), 15, 5)) robotCanDrive = false;
 
         SmartDashboard.putNumber("LimelightLockonCmd Count", llLockon.getTargetCount());
         // if (reading.getX() == 0F && reading.getY() == 0F) robotCanDrive = false;
 
-        if (Math.abs(reading.getX()) < 24) {
-            vx *= Constant.signum(reading.getX());
-            // vy *= Constant.signum(reading.getX());
-        }
+        // if (Math.abs(reading.getX()) < 24) {
+        //     double mv = (-reading.getX() + reading.getY()) / 2F;
+        //     // vx *= mv * Constant.signum(reading.getX());
+        //     vx *= mv;
+        //     // vy *= Constant.signum(reading.getX());
+        // }
+
+        SmartDashboard.putNumber("LimelightLockonCmd Omgea", omega);
+        SmartDashboard.putNumber("LimelightLockonCmd OmgeaCap", omegacap);
+
+        SmartDashboard.putNumber("LimelightLockonCmd X", vx);
+        SmartDashboard.putNumber("LimelightLockonCmd Y", vy);
+        SmartDashboard.putNumber("LimelightLockonCmd Omega", omega);
+        SmartDashboard.putBoolean("LimelightLockonCmd CanDrive", robotCanDrive);
 
         if (robotCanDrive) driveTrain.drive(new Translation2d(vx, vy), -reading.getX());
         else driveTrain.drive();
@@ -150,7 +150,7 @@ public class LimelightAlignToTargetCommand extends Command {
     public boolean isFinished() {
         super.isFinished();
         boolean retVal = false;
-        if (isAuto) {
+        if (autoDrive) {
             // 2024... time checks on the shooter (see if 2s had elapsed)
             return true;
         } else if (llLockon.getT().getY() < -16) {

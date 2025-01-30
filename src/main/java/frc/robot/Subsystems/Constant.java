@@ -13,6 +13,9 @@ public class Constant {
     public static int signum(double x) { return x >= 0 ? 1 : -1; }
     public static int signum(int x) { return x >= 0 ? 1 : -1; }
 
+    public static boolean isClose(double number, double to, double tolerance) { return Math.abs(number - to) <= tolerance;  }
+    public static boolean isClose(int number, int to, int tolerance) { return Math.abs(number - to) <= tolerance;  }
+
     public static class HelixPIDController {
         public double kP;
         public double kD;
