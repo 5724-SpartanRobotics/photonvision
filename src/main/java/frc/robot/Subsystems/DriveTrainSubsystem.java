@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -151,6 +152,14 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
     public void drive(double rotation) {
         _drive(new Translation2d(0, 0), rotation);
+    }
+
+    public void drive(Pose2d pose) {
+        _drive(pose.getTranslation(), pose.getRotation().getRadians());
+    }
+
+    public void drive(Pose3d pose) {
+        drive(pose.toPose2d());
     }
 
     public void drive() {

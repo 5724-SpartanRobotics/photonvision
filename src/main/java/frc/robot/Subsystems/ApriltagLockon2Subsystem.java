@@ -114,4 +114,8 @@ public class ApriltagLockon2Subsystem extends SubsystemBase {
     public boolean haveTag(int tagId) {
         return getFiducialId() > -1;
     }
+
+    public PhotonVisionSubsystem getVisionSubsystem() {
+        return vision;
+    }
 }
