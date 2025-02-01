@@ -4,6 +4,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.LimelightHelpers;
 import frc.robot.Subsystems.Constant.LockonSubsystem;
 
@@ -11,6 +12,20 @@ public class LimelightLockonSubsystem extends LockonSubsystem {
     private final DriveTrainSubsystem driveTrain;
     private final PIDController pidController;
     // private final Joystick drivestick;
+
+    private double lastDistance = 0;
+
+    public final class CoralPosition {
+        public double distance_m;
+        public double rotationOffset_rad;
+
+        public CoralPosition(double distance_m, double rotationOffset_rad) {
+            this.distance_m = distance_m;
+            this.rotationOffset_rad = rotationOffset_rad;
+        }
+    }
+
+    public CoralPosition coralPosition;
 
     public LimelightLockonSubsystem(
         DriveTrainSubsystem driveTrain
@@ -20,8 +35,26 @@ public class LimelightLockonSubsystem extends LockonSubsystem {
         this.pidController = new PIDController(0.005, 0.0, 0.0);
     }
 
+    @Override
+    public void periodic() {
+        super.periodic();
+        double currentDistance = Constant.CameraConstants.Limelight2Plus.HeightFromFloor * Math.tan(getVerticalTheta() - Constant.HalfPI);
+        double averageDistance = lastDistance * 0.8 + currentDistance * 0.2;
+
+
+        coralPosition = new CoralPosition(
+            averageDistance,
+            Units.degreesToRadians(getT().getX())
+        );
+
+        SmartDashboard.putNumber("Limelight distance m", coralPosition.distance_m);
+        SmartDashboard.putNumber("Limelight rotation offset rad", coralPosition.rotationOffset_rad);
+
+        lastDistance = averageDistance;
+    }
+
     /**
-     * @apiNote I don't know if this even works.
+     * @apiNote Find the distance from the object being targeted.
      */
     @Override
     public Double getDistance() {
@@ -35,9 +68,9 @@ public class LimelightLockonSubsystem extends LockonSubsystem {
         return (kTargetHeight_in - kLLLensHeight_in) / Math.tan(targetAngle_rad);
     }
 
-    @Override
-    public double getTheta() {
-        return -LimelightHelpers.getTX(Constant.AutoConstants.kLimelightName) + driveTrain.getGyroHeading().getDegrees();
+    public double getVerticalTheta() {
+        // return -LimelightHelpers.getTX(Constant.AutoConstants.kLimelightName) + driveTrain.getGyroHeading().getDegrees();
+        return LimelightHelpers.getTY(Constant.AutoConstants.kLimelightName) + Constant.CameraConstants.Limelight2Plus.MountAngleOffset;
     }
 
     public Pose2d getT() {

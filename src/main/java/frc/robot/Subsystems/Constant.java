@@ -222,7 +222,7 @@ public class Constant {
         public static final double kPAutoShoot = 6;
         public static final double kPTurnAutoShoot = 12;
 
-        public static final String kLimelightName = "Gamepiecedetection";
+        public static final String kLimelightName = "limelight";
     }
 
     public static final class CameraConstants {
@@ -231,6 +231,11 @@ public class Constant {
             public static final int Height_px = 480 / 2;
             public static final int vFOV = 60;
             public static final int hFOV = 120;
+        }
+
+        public static final class Limelight2Plus {
+            public static final double HeightFromFloor = 0.3;
+            public static final double MountAngleOffset = -0.261799;
         }
     }
 }
