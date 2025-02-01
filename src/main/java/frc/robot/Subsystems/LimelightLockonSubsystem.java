@@ -5,6 +5,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
 import frc.robot.LimelightHelpers.PoseEstimate;
@@ -65,9 +66,9 @@ public class LimelightLockonSubsystem extends LockonSubsystem {
         return (kTargetHeight_in - kLLLensHeight_in) / Math.tan(targetAngle_rad);
     }
 
-    @Override
-    public double getTheta() {
-        return -LimelightHelpers.getTX(Constant.AutoConstants.kLimelightName) + driveTrain.getGyroHeading().getDegrees();
+    public double getVerticalTheta() {
+        // return -LimelightHelpers.getTX(Constant.AutoConstants.kLimelightName) + driveTrain.getGyroHeading().getDegrees();
+        return LimelightHelpers.getTY(Constant.AutoConstants.kLimelightName) + Constant.CameraConstants.Limelight2Plus.MountAngleOffset;
     }
 
     public Pose2d getT() {
