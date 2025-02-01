@@ -8,6 +8,7 @@ import frc.robot.Subsystems.Constant;
 import frc.robot.Subsystems.DriveTrainSubsystem;
 import frc.robot.Subsystems.LimelightLockonSubsystem;
 import frc.robot.Subsystems.PhotonVisionSubsystem;
+import frc.robot.commands.AprilTagLimelight;
 import frc.robot.commands.ApriltagLockon2Command;
 import frc.robot.commands.LimelightAlignToTargetCommand;
 import frc.robot.commands.TeleopSwerve;
@@ -49,8 +50,9 @@ public class RobotContainer {
     private void configureButtonBindings() {
         jb_AlignApriltag.whileTrue(
             // new GotToAPlace2024(drive, vision, new Pose2d(), 3, drivestick, false)
-            new ApriltagLockon2Command(drive, vision, drivestick, new int[] {1}, 3)
+            // new ApriltagLockon2Command(drive, vision, drivestick, new int[] {1}, 3)
             // new ApriltagAlignToTargetCommand(drive, vision, new Pose2d(), 1, drivestick, false)
+            new AprilTagLimelight(drive, limelightLockon, drivestick)
         );
         jb_AlignLimelighObject.whileTrue(
             new LimelightAlignToTargetCommand(drive, limelightLockon, drivestick, 1, false)

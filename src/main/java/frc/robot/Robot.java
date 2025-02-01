@@ -72,7 +72,7 @@ public class Robot extends LoggedRobot {
         // });
     }
 
-    private boolean isRedAlliance() {
+    public static boolean isRedAlliance() {
         return DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red;
     }  
 }

@@ -3,7 +3,10 @@ package frc.robot.Subsystems;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import choreo.trajectory.SwerveSample;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,6 +16,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -36,6 +41,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
     private final PIDController xController = new PIDController(10.0, 0.0, 0.0);
     private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
     private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
+    private final SwerveDrivePoseEstimator poseEstimator;
 
     public DriveTrainSubsystem() {
         gyro = new Pigeon2(CanIdConstants.PigeonID);
@@ -64,10 +70,23 @@ public class DriveTrainSubsystem extends SubsystemBase {
         modules = new SwerveModule[]{LF, RF, LB, RB};
 
         SmartDashboard.putData("Field", m_field);
+
+        // Matrix<N3, N1> zeroMatrix = new Matrix<>(Nat.N3(), Nat.N1());
+        // zeroMatrix.fill(0.0);
+
+        poseEstimator = new SwerveDrivePoseEstimator(swerveDriveKinematics, lastUpdatedGyroHeading, swerveInitialPositions, robotPose);
     }
 
     public Rotation2d getGyroHeading() {
         return lastUpdatedGyroHeading;
+    }
+
+    public double getGyroRate() {
+        return gyro.getAngularVelocityZWorld().getValueAsDouble();
+    }
+
+    public SwerveDrivePoseEstimator getPoseEstimator() {
+        return poseEstimator;
     }
 
     public void setGyroZero() {
@@ -98,11 +117,13 @@ public class DriveTrainSubsystem extends SubsystemBase {
 
         UpdateGyro();
 
+        SwerveModulePosition[] positions = new SwerveModulePosition[]{
+            LF.getPosition(), RF.getPosition(), LB.getPosition(), RB.getPosition()
+        };
+
         robotPose = swerveDriveOdometry.update(
             getGyroHeading(),
-            new SwerveModulePosition[]{
-                LF.getPosition(), RF.getPosition(), LB.getPosition(), RB.getPosition()
-            }
+            positions
         );
 
         m_field.setRobotPose(robotPose);
@@ -115,6 +136,10 @@ public class DriveTrainSubsystem extends SubsystemBase {
             LB.periodic();
             RB.periodic();
        }
+
+       poseEstimator.update(getGyroHeading(), positions);
+       SmartDashboard.putNumber("drivetrain estimated pose X", getPoseEstimator().getEstimatedPosition().getX());
+       SmartDashboard.putNumber("drivetrain estimated pose Y", getPoseEstimator().getEstimatedPosition().getY());
     }
 
     @SuppressWarnings("removal")
