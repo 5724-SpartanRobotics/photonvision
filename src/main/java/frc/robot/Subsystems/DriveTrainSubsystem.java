@@ -3,8 +3,6 @@ package frc.robot.Subsystems;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import choreo.trajectory.SwerveSample;
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -16,8 +14,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,8 +21,10 @@ import frc.robot.Subsystems.Constant.CanIdConstants;
 import frc.robot.Subsystems.Constant.DebugLevel;
 import frc.robot.Subsystems.Constant.DebugSetting;
 import frc.robot.Subsystems.Constant.DriveConstants;
+import frc.robot.commands.TeleopSwerve;
 
 public class DriveTrainSubsystem extends SubsystemBase {
+    public static final boolean kFieldRelativeDefault = true;
     private final Field2d m_field = new Field2d();
     private final SwerveDriveOdometry swerveDriveOdometry;
     private final SwerveModule LF;
@@ -42,6 +40,9 @@ public class DriveTrainSubsystem extends SubsystemBase {
     private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
     private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
     private final SwerveDrivePoseEstimator poseEstimator;
+    private boolean fieldRelativeDriving = kFieldRelativeDefault;
+
+    private TeleopSwerve.JoystickAxes joystickAxes;
 
     public DriveTrainSubsystem() {
         gyro = new Pigeon2(CanIdConstants.PigeonID);
@@ -148,11 +149,12 @@ public class DriveTrainSubsystem extends SubsystemBase {
     }
 
     protected void _drive(Translation2d translation, double rotation) {
-        SwerveModuleState[] swerveModStates = swerveDriveKinematics.toSwerveModuleStates(
+        ChassisSpeeds speeds = fieldRelativeDriving ?
             ChassisSpeeds.fromFieldRelativeSpeeds(
                 translation.getX(), translation.getY(), rotation, getGyroHeading()
-            )
-        );
+            ) :
+            new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+        SwerveModuleState[] swerveModStates = swerveDriveKinematics.toSwerveModuleStates(speeds);
 
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModStates, DriveConstants.maxRobotSpeedmps);
 
@@ -162,33 +164,39 @@ public class DriveTrainSubsystem extends SubsystemBase {
         RB.setDesiredState(swerveModStates[3]);
     }
 
-    public void drive(SwerveModuleState[] swerveModStates) {
+    public DriveTrainSubsystem drive(SwerveModuleState[] swerveModStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModStates, DriveConstants.maxRobotSpeedmps);
 
         LF.setDesiredState(swerveModStates[0]);
         RF.setDesiredState(swerveModStates[1]);
         LB.setDesiredState(swerveModStates[2]);
         RB.setDesiredState(swerveModStates[3]);
+        return this;
     }
 
-    public void drive(Translation2d translation, double rotation) {
+    public DriveTrainSubsystem drive(Translation2d translation, double rotation) {
         _drive(translation, rotation);
+        return this;
     }
 
-    public void drive(double rotation) {
+    public DriveTrainSubsystem drive(double rotation) {
         _drive(new Translation2d(0, 0), rotation);
+        return this;
     }
 
-    public void drive(Pose2d pose) {
+    public DriveTrainSubsystem drive(Pose2d pose) {
         _drive(pose.getTranslation(), pose.getRotation().getRadians());
+        return this;
     }
 
-    public void drive(Pose3d pose) {
+    public DriveTrainSubsystem drive(Pose3d pose) {
         drive(pose.toPose2d());
+        return this;
     }
 
-    public void drive() {
+    public DriveTrainSubsystem drive() {
         _drive(new Translation2d(0, 0), 0);
+        return this;
     }
 
     public void simulationInit() {
@@ -226,9 +234,29 @@ public class DriveTrainSubsystem extends SubsystemBase {
         RB.setDesiredState(swerveModStates[3]);
     }
 
-    public void brake() {
+    public DriveTrainSubsystem brake() {
         for (SwerveModule module : modules) {
             module.setDesiredState(new SwerveModuleState(0, module.getState().angle));
         }
+        return this;
+    }
+
+    /**
+     * DO NOT FOREGT TO RESET AFTER USING!
+     * @param isFieldRelative
+     * @return
+     */
+    public DriveTrainSubsystem setFieldRelative(boolean isFieldRelative) {
+        fieldRelativeDriving = isFieldRelative;
+        return this;
+    }
+
+    public TeleopSwerve.JoystickAxes setJoystickAxes(TeleopSwerve.JoystickAxes axes) {
+        joystickAxes = axes;
+        return joystickAxes;
+    }
+
+    public TeleopSwerve.JoystickAxes getJoystickAxes() {
+        return joystickAxes;
     }
 }

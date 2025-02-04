@@ -17,6 +17,31 @@ public class TeleopSwerve extends Command {
     private Joystick controller;
     private DriveTrainSubsystem swerveDrive;
 
+    public static final class JoystickAxes {
+        public double axisX;
+        public double axisY;
+        public double axisZ;
+
+        public JoystickAxes(double x, double y, double z) {
+            this.axisX = x;
+            this.axisY = y;
+            this.axisZ = z;
+        }
+
+        public JoystickAxes() { this.axisX = 0; this.axisY = 0; this.axisZ = 0; }
+
+        public JoystickAxes set(double x, double y, double z) { this.axisX = x; this.axisY = y; this.axisZ = z; return this; }
+        public JoystickAxes setX(double x) {axisX = x; return this;}
+        public JoystickAxes setY(double y) {axisY = y; return this;}
+        public JoystickAxes setZ(double z) {axisZ = z; return this;}
+
+        public double getX() { return axisX; }
+        public double getY() { return axisY; }
+        public double getZ() { return axisZ; }
+    }
+
+    private JoystickAxes joystickAxes = new JoystickAxes();
+
     /**
      * Drive Controller
      * @param swerveDrive The drive train subsystem
@@ -72,10 +97,20 @@ public class TeleopSwerve extends Command {
                 SmartDashboard.putNumber("ControllerY", yAxis);
             }
             Translation2d translation = new Translation2d(yAxis, xAxis).times(DriveConstants.maxRobotSpeedmps);
+            joystickAxes.set(xAxis, yAxis, zAxis);
             swerveDrive.drive(translation, rotation);
+            swerveDrive.setJoystickAxes(getJoystickAxes());
             if(controller.getRawButton(3)) {
                 swerveDrive.setGyroZero();
             }
         }
+    }
+
+    /**
+     * Get the computed and math-ed joystick axes.
+     * @return Joystick axes: <samp>{x, y, z}</samp> 
+     */
+    public JoystickAxes getJoystickAxes() {
+        return joystickAxes;
     }
 }

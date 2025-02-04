@@ -217,7 +217,7 @@ public class Constant {
         public static final double kPThetaController = 3;
         public static final double autoShootCloseness = 0.003;
         public static final double degreesError = 5;
-        public static final double cameraAngleOffset = 5.5;
+        public static final double cameraAngleOffset = Math.PI / 6.5;
         public static final double cameraDepthOffset = 1;
         public static final double kPAutoShoot = 6;
         public static final double kPTurnAutoShoot = 12;

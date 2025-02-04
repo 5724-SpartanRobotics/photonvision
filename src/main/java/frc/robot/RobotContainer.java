@@ -15,9 +15,9 @@ import frc.robot.commands.TeleopSwerve;
 
 public class RobotContainer {
     private final DriveTrainSubsystem drive;
-    private final PhotonVisionSubsystem photon;
+    // private final PhotonVisionSubsystem photon;
     // private final VisionSubsystem2024 vision;
-    private final ApriltagLockon2Subsystem vision;
+    // private final ApriltagLockon2Subsystem vision;
     // private final ApriltagLockonSubsystem vision;
     private final LimelightLockonSubsystem limelightLockon;
     private final Joystick drivestick;
@@ -29,11 +29,11 @@ public class RobotContainer {
 
     public RobotContainer() {
         this.drive = new DriveTrainSubsystem();
-        this.photon = new PhotonVisionSubsystem("Front");
+        // this.photon = new PhotonVisionSubsystem("Front");
         this.drivestick = new Joystick(0);
 
         // this.vision = new VisionSubsystem2024(drive);
-        this.vision = new ApriltagLockon2Subsystem(drive, photon);
+        // this.vision = new ApriltagLockon2Subsystem(drive, photon);
         // this.vision = new ApriltagLockonSubsystem(drive, photon, drivestick);
         this.limelightLockon = new LimelightLockonSubsystem(drive);
 
