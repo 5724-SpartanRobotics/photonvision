@@ -56,7 +56,7 @@ public class RobotContainer {
             // new ApriltagLockon2Command(drive, vision, drivestick, new int[] {1}, 3)
             // new ApriltagAlignToTargetCommand(drive, vision, new Pose2d(), 1, drivestick, false)
             // new AprilTagLimelight(drive, limelightLockon, drivestick)
-            new AprilTagPhoton(photon.getCamera(), drive, drive.getPoseEstimator().getEstimatedPosition())
+            new AprilTagPhoton(photon.getCamera(), drive, drive.getPoseEstimator())
         );
         jb_AlignLimelighObject.whileTrue(
             new LimelightAlignToTargetCommand(drive, limelightLockon, drivestick, 1, false)

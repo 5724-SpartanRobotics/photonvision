@@ -19,8 +19,8 @@ public class Robot extends LoggedRobot {
     private final RobotContainer m_robotContainer;
 
     public Robot() {
-        DataLogManager.start();
-        DriverStation.startDataLog(DataLogManager.getLog());
+        // DataLogManager.start();
+        // DriverStation.startDataLog(DataLogManager.getLog());
 
         m_robotContainer = new RobotContainer();
     }
