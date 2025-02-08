@@ -75,7 +75,7 @@ public class DriveTrainSubsystem extends SubsystemBase {
         // Matrix<N3, N1> zeroMatrix = new Matrix<>(Nat.N3(), Nat.N1());
         // zeroMatrix.fill(0.0);
 
-        poseEstimator = new SwerveDrivePoseEstimator(swerveDriveKinematics, lastUpdatedGyroHeading, swerveInitialPositions, robotPose);
+        poseEstimator = new SwerveDrivePoseEstimator(swerveDriveKinematics, getGyroHeading(), swerveInitialPositions, robotPose);
     }
 
     public Rotation2d getGyroHeading() {
@@ -172,6 +172,10 @@ public class DriveTrainSubsystem extends SubsystemBase {
         LB.setDesiredState(swerveModStates[2]);
         RB.setDesiredState(swerveModStates[3]);
         return this;
+    }
+
+    public DriveTrainSubsystem drive(ChassisSpeeds speeds) {
+        return drive(swerveDriveKinematics.toSwerveModuleStates(speeds));
     }
 
     public DriveTrainSubsystem drive(Translation2d translation, double rotation) {

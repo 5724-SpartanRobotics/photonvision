@@ -3,6 +3,7 @@ package frc.robot.Subsystems;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,6 +18,7 @@ public class LimelightLockonSubsystem extends LockonSubsystem {
     // private final Joystick drivestick;
 
     public PoseEstimate poseEstimate;
+    public Pose3d poseBotSpace;
 
     public LimelightLockonSubsystem(
         DriveTrainSubsystem driveTrain
@@ -30,12 +32,14 @@ public class LimelightLockonSubsystem extends LockonSubsystem {
     public void periodic() {
         boolean rejectUpdate = false;
         LimelightHelpers.SetRobotOrientation(
-            "limelight-threeg", driveTrain.getPoseEstimator().getEstimatedPosition().getRotation().getDegrees(), 
+            "limelight-threeg", driveTrain.getGyroHeading().getDegrees(), 
             0, 0, 0, 0, 0
         );
         LimelightHelpers.PoseEstimate mt2;
+        poseBotSpace = LimelightHelpers.getTargetPose3d_RobotSpace("limelight-threeg");
         if (Robot.isRedAlliance()) mt2 = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-threeg");
         else mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-threeg");
+        if (mt2 == null) { poseEstimate = new PoseEstimate(); return; }
         if (Math.abs(driveTrain.getGyroRate()) > 720) rejectUpdate = true;
         if (mt2.tagCount <= 0) rejectUpdate = true;
         if (!rejectUpdate) {
@@ -47,9 +51,9 @@ public class LimelightLockonSubsystem extends LockonSubsystem {
         }
     }
 
-    public PoseEstimate getPoseEstimate() {
-        return poseEstimate;
-    }
+    public PoseEstimate getPoseEstimate() { return poseEstimate; }
+
+    public Pose3d getPoseRobotSpace() { return poseBotSpace; }
 
     /**
      * @apiNote I don't know if this even works.
