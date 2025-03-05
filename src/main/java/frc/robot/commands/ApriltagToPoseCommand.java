@@ -64,7 +64,7 @@ public class ApriltagToPoseCommand extends Command {
 
         this.tagSubset = allowedTags != null ? allowedTags.get() : new Integer[] {};
         
-        this.field = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+        this.field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
         this.poseEstimator = new PhotonPoseEstimator(
             this.field,
             PoseStrategy.LOWEST_AMBIGUITY,
